@@ -26,6 +26,7 @@ public class Main extends JavaPlugin
         MapManager.get().setupMaps();
     }
     
+    
     public void onDisable() {
         this.getLogger().info("Disabled!");
     }
