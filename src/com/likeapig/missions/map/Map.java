@@ -9,14 +9,17 @@ import java.util.*;
 import java.util.List;
 
 import org.bukkit.entity.*;
-import net.md_5.bungee.api.*;
+
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import com.likeapig.missions.commands.*;
 
 public class Map
 {
     private String name;
     private static List<Data> datas;
-    private List<LivingEntity> mobs;
+    private List<NPC> npcs;
     private List<Location> doors;
     private Location spawn;
     private Location bossLoc;
@@ -25,9 +28,10 @@ public class Map
     private Location door3;
     private Location door4;
     private MapState state;
+    NPCRegistry registry = CitizensAPI.getNPCRegistry();
     
     public Map(final String s) {
-        this.mobs = Mob.get().getMobs();
+        npcs = Mob.get().getNpcs();
         this.doors = new ArrayList<Location>();
         this.state = MapState.STOPPED;
         this.name = s;
@@ -203,10 +207,11 @@ public class Map
     }
     
     public void stop() {
+    	Timer.get().stopTasks(this);
         this.setState(MapState.WAITING);
         this.kickAll(true);
-        for (final LivingEntity le : this.mobs) {
-            le.remove();
+        for (NPC NPCs : npcs) {
+        	registry.deregister(NPCs);
         }
     }
     
