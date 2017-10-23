@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Evoker;
+import org.bukkit.entity.Player;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -40,9 +41,12 @@ public class Mob {
 	public void spawnRound1(final Location loc) {
 
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Robocop");
-
+		
 		npcs.add(npc);
 		for (NPC NPC : npcs) {
+			if (NPC.data().get(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA) == null) {
+				NPC.data().set(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA, false);
+			}
 			NPC.spawn(loc);
 		}
 	}
