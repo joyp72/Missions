@@ -35,20 +35,18 @@ public class Mission extends Trait
     
     public void onAttach() {
         this.load((DataKey)new MemoryDataKey());
-        this.npc.data().set("glowing", (Object)false);
-    
+        
+        npc.data().set(NPC.GLOWING_METADATA, true);
+        
     }
     
     public void onDespawn() {
     }
     
     public void onSpawn() {
-        this.npc.getNavigator().setTarget((Entity)Map.getPlayer(), true);
+       // this.npc.getNavigator().setTarget((Entity)Map.getPlayer(), true);
         this.getLivingEntity().setMaxHealth(50.0);
         this.getLivingEntity().setHealth(50.0);
-        
-        npc.data().set(NPC.NAMEPLATE_VISIBLE_METADATA, false);
-        npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
     }
     
     public void onRemove() {
