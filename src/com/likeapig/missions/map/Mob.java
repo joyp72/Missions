@@ -14,40 +14,35 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 
 public class Mob {
 	public static Mob instance;
-	Evoker ev;
-	public List<NPC> npcs;
-	Location loc;
-	NPCRegistry registry = CitizensAPI.getNPCRegistry();
-
-	static {
-		Mob.instance = new Mob();
-	}
-
-	public static Mob get() {
-		return Mob.instance;
-	}
-
-	public List<NPC> getNpcs() {
-		return npcs;
-	}
-
-	private Mob() {
-		npcs = new ArrayList<NPC>();
-	}
-
-	public void spawnBoss(final Location loc) {
-	}
-
-	public void spawnRound1(final Location loc) {
-
-		NPC npc = registry.createNPC(EntityType.PLAYER, "Robocop");
-		
-		npcs.add(npc);
-		for (NPC NPC : npcs) {
-			if (NPC.data().get(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA) == null) {
-				NPC.data().set(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA, false);
-			}
-			NPC.spawn(loc);
-		}
-	}
+    Evoker ev;
+    public static List<NPC> npcs;
+    Location loc;
+    NPCRegistry registry;
+    
+    static {
+        Mob.instance = new Mob();
+    }
+    
+    public static Mob get() {
+        return Mob.instance;
+    }
+    
+    public List<NPC> getNpcs() {
+        return Mob.npcs;
+    }
+    
+    private Mob() {
+        this.registry = CitizensAPI.getNPCRegistry();
+        Mob.npcs = new ArrayList<NPC>();
+    }
+    
+    public void spawnBoss(final Location loc) {
+    }
+    
+    public void spawnRound1(final Location loc) {
+        final NPC npc = this.registry.createNPC(EntityType.PLAYER, "Robocop");
+        npc.addTrait(Mission.class);
+        Mob.npcs.add(npc);
+        npc.spawn(loc);
+    }
 }
