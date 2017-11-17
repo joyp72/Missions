@@ -35,6 +35,7 @@ public class CommandsManager implements CommandExecutor
         this.cmds.add(new Stop());
         this.cmds.add(new com.likeapig.missions.commands.List());
         this.cmds.add(new SetDoor());
+        cmds.add(new SpawnBoss());
     }
     
     public boolean onCommand(final CommandSender sender, final Command cmd, final String arg2, String[] args) {

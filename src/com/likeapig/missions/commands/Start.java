@@ -11,8 +11,8 @@ public class Start extends Commands
     
     @Override
     public void onCommand(final Player sender, final String[] args) {
-        final Map m = MapManager.get().getMap(sender);
-        if (m == null) {
+        final Map m = MapManager.get().getMap("test");
+        if (!m.containsPlayer(sender)) {
             MessageManager.get().message(sender, "You are not in a map.", MessageManager.MessageType.BAD);
             return;
         }

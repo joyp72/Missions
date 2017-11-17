@@ -18,11 +18,7 @@ public class SetDoor extends Commands
             return;
         }
         final String id = args[0];
-        final Map m = MapManager.get().getMap(id);
-        if (m == null) {
-            MessageManager.get().message(sender, "Unknown map.", MessageManager.MessageType.BAD);
-            return;
-        }
+        final Map m = MapManager.get().getMap("test");
         if (args[1].equalsIgnoreCase("1")) {
             m.setDoorLoc1(l);
             MessageManager.get().message(sender, "Door 1 set for: " + m.getName(), MessageManager.MessageType.GOOD);

@@ -16,11 +16,7 @@ public class SetSpawn extends Commands
             return;
         }
         final String id = args[0];
-        final Map m = MapManager.get().getMap(id);
-        if (m == null) {
-            MessageManager.get().message(sender, "Unknown map.", MessageManager.MessageType.BAD);
-            return;
-        }
+        final Map m = MapManager.get().getMap("test");
         m.setSpawn(sender.getLocation());
         MessageManager.get().message(sender, "Alpha spawn set for: " + m.getName(), MessageManager.MessageType.GOOD);
     }
