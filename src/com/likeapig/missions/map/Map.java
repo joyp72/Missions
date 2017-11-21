@@ -129,12 +129,10 @@ public class Map {
 	}
 
 	public void onTimerTick(final String arg, final int timer) {
-		arg.equalsIgnoreCase("endround");
 	}
 
 	public void onTimerEnd(final String arg) {
 		if (arg.equalsIgnoreCase("round1end")) {
-			this.stop();
 		}
 	}
 
@@ -175,30 +173,28 @@ public class Map {
 	}
 
 	public void firstRound() {
-		// Mob.get().spawnRound1(door1);
-		// Mob.get().spawnRound1(door2);
-		// Mob.get().spawnRound1(door3);
-		// Mob.get().spawnRound1(door4);
-		Mob.get().Round2Boss(bossLoc);
+		Mob.get().spawnRound1(door1);
+		Mob.get().spawnRound1(door2);
+		Mob.get().spawnRound1(door3);
+		Mob.get().spawnRound1(door4);
 
-		// Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
-		// @Override
-		// public void run() {
-		// Mob.get().spawnRound1(door1);
-		// Mob.get().spawnRound1(door2);
-		// Mob.get().spawnRound1(door3);
-		// Mob.get().spawnRound1(door4);
-		// }
-		// }, 40L);
-		// Timer.get().createTimer(this.getMap(), "round1end",
-		// 60).startTimer(this.getMap(), "round1end");
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				Mob.get().spawnRound1(door1);
+				Mob.get().spawnRound1(door2);
+				Mob.get().spawnRound1(door3);
+				Mob.get().spawnRound1(door4);
+			}
+		}, 40L);
+		//Timer.get().createTimer(this.getMap(), "round1end", 60).startTimer(this.getMap(), "round1end");
 	}
 
 	public void secondRound() {
-		// setRound(2);
-		// Mob.get().spawnRound2(door1);
-		// Mob.get().spawnRound2(door2);
-		// Mob.get().Round2Boss(bossLoc);
+		setRound(2);
+		Mob.get().spawnRound2(door1);
+		Mob.get().spawnRound2(door2);
+		Mob.get().Floor1Boss(bossLoc);
 	}
 
 	public int getRound() {
@@ -248,7 +244,7 @@ public class Map {
 			MessageManager.get().message(p, "Kicked for: " + message);
 		}
 		if (showLeaveMessage) {
-			MessageManager.get().message(p, "You left the arena!", MessageManager.MessageType.BAD);
+			MessageManager.get().message(p, "You left the mission!", MessageManager.MessageType.BAD);
 		}
 		this.removePlayer(p);
 	}
@@ -339,8 +335,22 @@ public class Map {
 		return round1.contains(npc) || round2.contains(npc) || boss1.contains(npc);
 	}
 
-	public List<NPC> getRound1() {
-		return round1;
+	public List<NPC> getRoundNPC(int i) {
+		if (i == 1) {
+			return round1;
+		} else if (i == 2) {
+			return round2;
+		} else {
+			return null;
+		}
+	}
+	
+	public List<NPC> getBoss(int i) {
+		if (i == 1) {
+			return boss1;
+		} else {
+			return null;
+		}
 	}
 
 	public String getName() {

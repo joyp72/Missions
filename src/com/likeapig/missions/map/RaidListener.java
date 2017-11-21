@@ -9,6 +9,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
 import com.likeapig.missions.*;
+import com.likeapig.missions.models.LawnMower;
+
 import org.bukkit.plugin.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -72,8 +74,15 @@ public class RaidListener implements Listener {
 			NPC npc = e.getNPC();
 			Map m = MapManager.get().getMap(npc);
 			if (m != null) {
+				if (Mob.get().getRound(1).contains(npc)) {
+					e.setDamage(4);
+				}
+				if (Mob.get().getRound(2).contains(npc)) {
+					e.setDamage(5);
+				}
 				if (Mob.get().getBoss(1).contains(npc)) {
 					if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
+						e.setDamage(6);
 						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
 						p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
 					}
@@ -87,6 +96,10 @@ public class RaidListener implements Listener {
 		if (e.getRightClicked() instanceof ArmorStand) {
 			if (Boss.get().getParts().containsValue(e.getRightClicked())) {
 				e.setCancelled(true);
+			}
+			if (LawnMower.get().getParts().containsValue(e.getRightClicked())) {
+				e.setCancelled(true);
+				LawnMower.get().setPassanger(e.getPlayer());
 			}
 		}
 	}

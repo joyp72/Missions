@@ -1,6 +1,8 @@
 package com.likeapig.missions.commands;
 
 import org.bukkit.entity.*;
+
+import com.likeapig.missions.commands.MessageManager.MessageType;
 import com.likeapig.missions.map.*;
 import com.likeapig.missions.map.Map;
 
@@ -14,12 +16,14 @@ public class List extends Commands {
 
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
-		if (MapManager.get().getMap("test") != null) {
+		if (MapManager.get().getMaps().size() > 0) {
 			MessageManager.get().message(sender, "Map list: ");
-			Map m = MapManager.get().getMap("test");
-			MessageManager.get().message(sender, ChatColor.YELLOW + m.getName());
+			for (Map m : MapManager.get().getMaps()) {
+				MessageManager.get().message(sender,
+						new StringBuilder().append(ChatColor.YELLOW).append(m.getName()).toString());
+			}
 		} else {
-			MessageManager.get().message(sender, "No maps found", MessageManager.MessageType.BAD);
-		}
+			MessageManager.get().message(sender, "No maps found", MessageType.BAD);
+}
 	}
 }

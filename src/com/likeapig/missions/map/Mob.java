@@ -68,7 +68,7 @@ public class Mob {
 		}
 	}
 
-	public void Round2Boss(final Location loc) {
+	public void Floor1Boss(final Location loc) {
 
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
 		npc.addTrait(MissionTrait.class);
