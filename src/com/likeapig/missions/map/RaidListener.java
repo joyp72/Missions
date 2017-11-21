@@ -88,8 +88,10 @@ public class RaidListener implements Listener {
 			if (e.getClickedBlock().getType() == Material.STONE_BUTTON && e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				if (edit.containsKey(MapManager.get().getMap("test"))) {
 					Map m = MapManager.get().getMap("test");
-					m.setButton(edit.get(m), e.getClickedBlock().getLocation());
-					MessageManager.get().message(p, "You set button 2 for " + m.getName() + ".");
+					m.setButton2(edit.get(m), e.getClickedBlock().getLocation());
+					MessageManager.get().message(p, "You set button for " + m.getName() + ".");
+					edit.clear();
+					editors.clear();
 					return;
 				}
 			}
@@ -98,8 +100,10 @@ public class RaidListener implements Listener {
 			if (e.getClickedBlock() != null) {
 				if (map.getButtons(2).contains(e.getClickedBlock().getLocation())) {
 					if (p.getInventory().contains(map.getCard(1))) {
-						p.teleport(map.getFloor(2));
-						return;
+						if (map.getFloor() == 1) {
+							p.teleport(map.getFloor(2));
+							return;
+						}
 					}
 				}
 			}

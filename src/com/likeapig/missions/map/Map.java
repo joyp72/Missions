@@ -27,12 +27,13 @@ import com.likeapig.missions.commands.MessageManager.MessageType;
 public class Map {
 	private String name;
 	static Data data;
-	private int round = 1;
+	private int round;
+	private int floor;
 	private List<NPC> round1;
 	private List<NPC> round2;
 	private List<NPC> boss1;
 	private List<Location> doors;
-	private List<Location> button2s;
+	private List<Location> b2s;
 	private Location spawn;
 	private Location bossLoc;
 	private Location door1;
@@ -41,8 +42,10 @@ public class Map {
 	private Location door4;
 	private MapState state;
 	private ItemStack card1;
-	private Location button2;
+	private Location b2f1;
+	private Location b2f2;
 	private Location floor2;
+	private Location floor1;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -51,9 +54,11 @@ public class Map {
 		round2 = Mob.get().getRound(2);
 		boss1 = Mob.get().getBoss(1);
 		this.doors = new ArrayList<Location>();
-		button2s = new ArrayList<Location>();
+		b2s = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
+		floor = 1;
+		round = 1;
 		card1 = new ItemStack(Material.PAPER);
 		{
 			ItemMeta meta = card1.getItemMeta();
@@ -74,8 +79,11 @@ public class Map {
 			this.doors.add(this.door3);
 			this.doors.add(this.door4);
 		}
-		if (button2 != null) {
-			button2s.add(button2);
+		if (b2f1 != null) {
+			b2s.add(b2f1);
+		}
+		if (b2f2 != null) {
+			b2s.add(b2f2);
 		}
 		this.saveToConfig();
 		this.checkState();
@@ -122,11 +130,17 @@ public class Map {
 		if (this.door4 != null) {
 			Settings.get().set("maps." + this.getName() + ".door4", LocationUtils.locationToString(this.door4));
 		}
-		if (button2 != null) {
-			Settings.get().set("maps." + this.getName() + ".button2", LocationUtils.locationToString(button2));
+		if (b2f1 != null) {
+			Settings.get().set("maps." + this.getName() + ".b2f1", LocationUtils.locationToString(b2f1));
+		}
+		if (b2f2 != null) {
+			Settings.get().set("maps." + this.getName() + ".b2f2", LocationUtils.locationToString(b2f2));
 		}
 		if (floor2 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor2", LocationUtils.locationToString(floor2));
+		}
+		if (floor1 != null) {
+			Settings.get().set("maps." + this.getName() + ".floor1", LocationUtils.locationToString(floor1));
 		}
 	}
 
@@ -162,15 +176,25 @@ public class Map {
 			(this.door4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.door4.setYaw(LocationUtils.stringToYaw(s3));
 		}
-		if (s.get("maps." + this.getName() + ".button2") != null) {
-			final String s3 = s.get("maps." + this.getName() + ".button2");
-			(this.button2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
-			this.button2.setYaw(LocationUtils.stringToYaw(s3));
+		if (s.get("maps." + this.getName() + ".b2f1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".b2f1");
+			(this.b2f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.b2f1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".b2f2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".b2f2");
+			(this.b2f2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.b2f2.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".floor2") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".floor2");
 			(this.floor2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.floor2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".floor1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".floor1");
+			(this.floor1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.floor1.setYaw(LocationUtils.stringToYaw(s3));
 		}
 	}
 
@@ -187,7 +211,10 @@ public class Map {
 		if (this.spawn == null) {
 			flag = true;
 		}
-		if (button2 == null) {
+		if (b2f1 == null) {
+			flag = true;
+		}
+		if (b2f2 == null) {
 			flag = true;
 		}
 		if (this.bossLoc == null) {
@@ -206,6 +233,9 @@ public class Map {
 			flag = true;
 		}
 		if (floor2 == null) {
+			flag = true;
+		}
+		if (floor1 == null) {
 			flag = true;
 		}
 		if (flag) {
@@ -262,6 +292,14 @@ public class Map {
 
 	public void setRound(int i) {
 		round = i;
+	}
+
+	public int getFloor() {
+		return floor;
+	}
+
+	public void setFloor(int i) {
+		floor = i;
 	}
 
 	public void addPlayer(final Player p) {
@@ -355,9 +393,14 @@ public class Map {
 		this.saveToConfig();
 	}
 
-	public void setButton(int i, Location l) {
+	public void setButton2(int i, Location l) {
+		if (i == 1) {
+			b2f1 = l;
+			saveToConfig();
+			checkState();
+		}
 		if (i == 2) {
-			button2 = l;
+			b2f2 = l;
 			saveToConfig();
 			checkState();
 		}
@@ -390,26 +433,37 @@ public class Map {
 	public Location getBossLoc() {
 		return this.bossLoc;
 	}
-	
-	public Location getButtonLoc(int i) {
+
+	public Location get2ButtonLoc(int i) {
+		if (i == 1) {
+			return b2f1;
+		}
 		if (i == 2) {
-			return button2;
+			return b2f2;
 		} else {
 			return null;
 		}
 	}
-	
+
 	public void setFloor(int i, Location l) {
 		if (i == 2) {
 			floor2 = l;
 			saveToConfig();
 			checkState();
 		}
+		if (i == 1) {
+			floor1 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
-	
+
 	public Location getFloor(int i) {
 		if (i == 2) {
 			return floor2;
+		}
+		if (i == 1) {
+			return floor1;
 		} else {
 			return null;
 		}
@@ -464,10 +518,10 @@ public class Map {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public List<Location> getButtons(int i) {
 		if (i == 2) {
-			return button2s;
+			return b2s;
 		} else {
 			return null;
 		}

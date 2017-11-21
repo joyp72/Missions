@@ -34,12 +34,18 @@ public class Edit extends Commands {
 			MessageManager.get().message(sender, "You have quit editing.");
 			return;
 		}
-		if (args[1].equalsIgnoreCase("2")) {
+		if (args[1].equalsIgnoreCase("21")) {
+			editors.add(sender);
+			edit.put(m, 1);
+			MessageManager.get().message(sender, "Editing for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("22")) {
 			editors.add(sender);
 			edit.put(m, 2);
 			MessageManager.get().message(sender, "Editing for: " + m.getName());
 			return;
-		} else {
+		}else {
 			MessageManager.get().message(sender, "Bad Input", MessageType.BAD);
 			return;
 		}
