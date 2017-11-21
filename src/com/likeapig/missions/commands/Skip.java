@@ -30,7 +30,7 @@ public class Skip extends Commands {
 				registry.deregister(npcs);
 			}
 			m.getRoundNPC(1).clear();
-			m.getPlayer().sendMessage(ChatColor.GREEN + "Round 1 ended.");
+			m.message("A guard has been deployed.");
 			m.secondRound();
 			return;
 		}
@@ -43,8 +43,8 @@ public class Skip extends Commands {
 				registry.deregister(npcs);
 			}
 			m.getRoundNPC(2).clear();
-			m.getPlayer().sendMessage(ChatColor.GREEN + "Round 2 ended.");
-			m.kickPlayer(p);
+			m.getPlayer().getInventory().addItem(m.getCard(1));
+			m.message("You picked up a Keycard!");
 			return;
 		}
 

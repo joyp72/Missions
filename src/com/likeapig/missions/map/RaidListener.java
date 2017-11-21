@@ -9,6 +9,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
 import com.likeapig.missions.*;
+import com.likeapig.missions.commands.MessageManager;
 import com.likeapig.missions.models.LawnMower;
 
 import org.bukkit.plugin.*;
@@ -22,10 +23,12 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.*;
 import org.bukkit.event.*;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 public class RaidListener implements Listener {
 	private static RaidListener instance;
@@ -64,6 +67,26 @@ public class RaidListener implements Listener {
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		if (e.getEntity().hasMetadata("NPC")) {
 			e.setDeathMessage(null);
+		} else {
+			Player p = e.getEntity();
+			Map m = MapManager.get().getMap(p);
+			if (m != null) {
+				e.setDeathMessage(null);
+				e.setKeepInventory(true);
+				m.kickPlayer(p, "You died!", false);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
+		HashMap<Map, Integer> edit = MapManager.get().getEdit();
+		List<Player> editors = MapManager.get().getEditors();
+		if (editors.contains(p)) {
+			if (e.getClickedBlock().getType() == Material.STONE_BUTTON && e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				MessageManager.get().message(p, "You clicked on a stone button.");
+			}
 		}
 	}
 

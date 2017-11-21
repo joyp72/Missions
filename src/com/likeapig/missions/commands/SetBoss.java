@@ -7,7 +7,7 @@ import com.likeapig.missions.map.MapManager;
 
 public class SetBoss extends Commands {
 	public SetBoss() {
-		super("raid.admin", "Set the Boss spawn of a map", "<map>", new String[] { "sal" });
+		super("raid.admin", "Set the Edit of a map", "<map>", new String[] { "edt" });
 	}
 
 	@Override

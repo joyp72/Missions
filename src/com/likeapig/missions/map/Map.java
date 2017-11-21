@@ -2,6 +2,8 @@ package com.likeapig.missions.map;
 
 import org.bukkit.*;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 
 import com.likeapig.missions.*;
 import com.likeapig.missions.utils.*;
@@ -9,6 +11,9 @@ import java.util.*;
 import java.util.List;
 
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.mcmonkey.sentinel.SentinelTarget;
 import org.mcmonkey.sentinel.SentinelTrait;
 
@@ -17,6 +22,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import com.likeapig.missions.commands.*;
+import com.likeapig.missions.commands.MessageManager.MessageType;
 
 public class Map {
 	private String name;
@@ -33,6 +39,8 @@ public class Map {
 	private Location door3;
 	private Location door4;
 	private MapState state;
+	private ItemStack card1;
+	private Location button2;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -43,6 +51,19 @@ public class Map {
 		this.doors = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
+		card1 = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = card1.getItemMeta();
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Keycard");
+			ArrayList<String> lore = new ArrayList<>();
+			lore.add(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Mission Item)");
+			lore.add("");
+			lore.add(ChatColor.GRAY + "Used to access 2nd Floor.");
+			meta.setLore(lore);
+			meta.addItemFlags(ItemFlag.values());
+			card1.setItemMeta(meta);
+			card1.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
+		}
 		this.loadFromConfig();
 		if (this.door1 != null && this.door2 != null && this.door3 != null && this.door4 != null) {
 			this.doors.add(this.door1);
@@ -64,12 +85,15 @@ public class Map {
 			round2.remove(npc);
 			registry.deregister(npc);
 		}
-		if (getRound() == 1 && round1.size() == 0) {
-			getPlayer().sendMessage(ChatColor.GREEN + "Round 1 ended.");
-			secondRound();
+		if (boss1.contains(npc)) {
+			boss1.remove(npc);
+			registry.deregister(npc);
+			getPlayer().getInventory().addItem(card1);
+			message("You picked up a Keycard!");
 		}
-		if (getRound() == 2 && round2.size() == 0) {
-			getPlayer().sendMessage(ChatColor.GREEN + "Round 2 ended.");
+		if (getRound() == 1 && round1.size() == 0) {
+			message("A guard has been deployed.");
+			secondRound();
 		}
 	}
 
@@ -91,6 +115,9 @@ public class Map {
 		}
 		if (this.door4 != null) {
 			Settings.get().set("maps." + this.getName() + ".door4", LocationUtils.locationToString(this.door4));
+		}
+		if (button2 != null) {
+			Settings.get().set("maps." + this.getName() + ".button2", LocationUtils.locationToString(button2));
 		}
 	}
 
@@ -125,6 +152,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".door4");
 			(this.door4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.door4.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".button2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".button2");
+			(this.button2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.button2.setYaw(LocationUtils.stringToYaw(s3));
 		}
 	}
 
@@ -187,14 +219,21 @@ public class Map {
 				Mob.get().spawnRound1(door4);
 			}
 		}, 40L);
-		//Timer.get().createTimer(this.getMap(), "round1end", 60).startTimer(this.getMap(), "round1end");
+		// Timer.get().createTimer(this.getMap(), "round1end",
+		// 60).startTimer(this.getMap(), "round1end");
 	}
 
 	public void secondRound() {
 		setRound(2);
-		Mob.get().spawnRound2(door1);
-		Mob.get().spawnRound2(door2);
-		Mob.get().Floor1Boss(bossLoc);
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			
+			@Override
+			public void run() {
+				Mob.get().spawnRound2(door1);
+				Mob.get().spawnRound2(door2);
+				Mob.get().Floor1Boss(bossLoc);				
+			}
+		}, 2);
 	}
 
 	public int getRound() {
@@ -218,6 +257,9 @@ public class Map {
 
 	public void removePlayer(final Player p) {
 		if (this.containsPlayer(p)) {
+			if (p.getInventory().contains(card1)) {
+				p.getInventory().remove(card1);
+			}
 			Map.data.restore();
 			Map.data = null;
 			if (Map.data == null) {
@@ -241,7 +283,7 @@ public class Map {
 
 	public void kickPlayer(final Player p, final String message, final boolean showLeaveMessage) {
 		if (message != "") {
-			MessageManager.get().message(p, "Kicked for: " + message);
+			MessageManager.get().message(p, message, MessageType.BAD);
 		}
 		if (showLeaveMessage) {
 			MessageManager.get().message(p, "You left the mission!", MessageManager.MessageType.BAD);
@@ -250,21 +292,27 @@ public class Map {
 	}
 
 	public void stop() {
-		Timer.get().stopTasks(this);
+		// Timer.get().stopTasks(this);
 		this.setState(MapState.WAITING);
-		for (final NPC NPCs : this.round1) {
-			this.registry.deregister(NPCs);
-		}
-		round1.clear();
-		for (final NPC NPCs : this.round2) {
-			this.registry.deregister(NPCs);
-		}
-		this.round2.clear();
-		for (NPC NPCs : boss1) {
-			registry.deregister(NPCs);
-		}
-		boss1.clear();
-		setRound(1);
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+
+			@Override
+			public void run() {
+				for (final NPC NPCs : round1) {
+					registry.deregister(NPCs);
+				}
+				round1.clear();
+				for (final NPC NPCs : round2) {
+					registry.deregister(NPCs);
+				}
+				round2.clear();
+				for (NPC NPCs : boss1) {
+					registry.deregister(NPCs);
+				}
+				boss1.clear();
+				setRound(1);
+			}
+		}, 1);
 	}
 
 	public boolean isStarted() {
@@ -344,10 +392,18 @@ public class Map {
 			return null;
 		}
 	}
-	
+
 	public List<NPC> getBoss(int i) {
 		if (i == 1) {
 			return boss1;
+		} else {
+			return null;
+		}
+	}
+
+	public ItemStack getCard(int i) {
+		if (i == 1) {
+			return card1;
 		} else {
 			return null;
 		}

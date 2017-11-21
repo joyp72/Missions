@@ -69,6 +69,7 @@ public class MissionTrait extends Trait {
 	@Override
 	public void onAttach() {
 		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
+		npc.data().set(NPC.DROPS_ITEMS_METADATA, false);
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		
 	}

@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 public class MapManager {
 	public static MapManager instance;
 	public List<Map> maps;
+	public List<Player> editors;
+	public HashMap<Map, Integer> edit;
 
 	static {
 		MapManager.instance = new MapManager();
@@ -22,6 +24,16 @@ public class MapManager {
 
 	private MapManager() {
 		maps = new ArrayList<Map>();
+		editors = new ArrayList<Player>();
+		edit = new HashMap<Map, Integer>();
+	}
+	
+	public HashMap<Map, Integer> getEdit() {
+		return edit;
+	}
+	
+	public List<Player> getEditors() {
+		return editors;
 	}
 
 	public void registerMap(String s) {

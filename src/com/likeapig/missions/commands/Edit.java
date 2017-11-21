@@ -1,0 +1,42 @@
+package com.likeapig.missions.commands;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+
+import com.likeapig.missions.commands.MessageManager.MessageType;
+import com.likeapig.missions.map.Map;
+import com.likeapig.missions.map.MapManager;
+
+public class Edit extends Commands {
+	public Edit() {
+		super("raid.admin", "Set the buttons of a map", "<map>", new String[] { "edit" });
+	}
+
+	private HashMap<Map, Integer> edit = MapManager.get().getEdit();
+	private List<Player> editors = MapManager.get().getEditors();
+
+	@Override
+	public void onCommand(final Player sender, final String[] args) {
+		if (args.length == 0) {
+			MessageManager.get().message(sender, "You must specify a map!", MessageManager.MessageType.BAD);
+			return;
+		}
+		final String id = args[0];
+		final Map m = MapManager.get().getMap(id);
+		if (m == null) {
+			MessageManager.get().message(sender, "Unknown map.", MessageManager.MessageType.BAD);
+			return;
+		}
+		if (args[1].equalsIgnoreCase("1")) {
+			editors.add(sender);
+			edit.put(m, 1);
+			MessageManager.get().message(sender, "Editing for: " + m.getName());
+			return;
+		} else {
+			MessageManager.get().message(sender, "Bad Input", MessageType.BAD);
+			return;
+		}
+	}
+}
