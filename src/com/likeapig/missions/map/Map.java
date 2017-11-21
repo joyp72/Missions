@@ -32,6 +32,7 @@ public class Map {
 	private List<NPC> round2;
 	private List<NPC> boss1;
 	private List<Location> doors;
+	private List<Location> button2s;
 	private Location spawn;
 	private Location bossLoc;
 	private Location door1;
@@ -41,6 +42,7 @@ public class Map {
 	private MapState state;
 	private ItemStack card1;
 	private Location button2;
+	private Location floor2;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -49,6 +51,7 @@ public class Map {
 		round2 = Mob.get().getRound(2);
 		boss1 = Mob.get().getBoss(1);
 		this.doors = new ArrayList<Location>();
+		button2s = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
 		card1 = new ItemStack(Material.PAPER);
@@ -70,6 +73,9 @@ public class Map {
 			this.doors.add(this.door2);
 			this.doors.add(this.door3);
 			this.doors.add(this.door4);
+		}
+		if (button2 != null) {
+			button2s.add(button2);
 		}
 		this.saveToConfig();
 		this.checkState();
@@ -119,6 +125,9 @@ public class Map {
 		if (button2 != null) {
 			Settings.get().set("maps." + this.getName() + ".button2", LocationUtils.locationToString(button2));
 		}
+		if (floor2 != null) {
+			Settings.get().set("maps." + this.getName() + ".floor2", LocationUtils.locationToString(floor2));
+		}
 	}
 
 	public void loadFromConfig() {
@@ -158,6 +167,11 @@ public class Map {
 			(this.button2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.button2.setYaw(LocationUtils.stringToYaw(s3));
 		}
+		if (s.get("maps." + this.getName() + ".floor2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".floor2");
+			(this.floor2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.floor2.setYaw(LocationUtils.stringToYaw(s3));
+		}
 	}
 
 	public void onTimerTick(final String arg, final int timer) {
@@ -173,6 +187,9 @@ public class Map {
 		if (this.spawn == null) {
 			flag = true;
 		}
+		if (button2 == null) {
+			flag = true;
+		}
 		if (this.bossLoc == null) {
 			flag = true;
 		}
@@ -186,6 +203,9 @@ public class Map {
 			flag = true;
 		}
 		if (this.door4 == null) {
+			flag = true;
+		}
+		if (floor2 == null) {
 			flag = true;
 		}
 		if (flag) {
@@ -226,12 +246,12 @@ public class Map {
 	public void secondRound() {
 		setRound(2);
 		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
-			
+
 			@Override
 			public void run() {
 				Mob.get().spawnRound2(door1);
 				Mob.get().spawnRound2(door2);
-				Mob.get().Floor1Boss(bossLoc);				
+				Mob.get().Floor1Boss(bossLoc);
 			}
 		}, 2);
 	}
@@ -335,6 +355,14 @@ public class Map {
 		this.saveToConfig();
 	}
 
+	public void setButton(int i, Location l) {
+		if (i == 2) {
+			button2 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+
 	public void setDoorLoc1(final Location l) {
 		this.door1 = l;
 		this.checkState();
@@ -361,6 +389,30 @@ public class Map {
 
 	public Location getBossLoc() {
 		return this.bossLoc;
+	}
+	
+	public Location getButtonLoc(int i) {
+		if (i == 2) {
+			return button2;
+		} else {
+			return null;
+		}
+	}
+	
+	public void setFloor(int i, Location l) {
+		if (i == 2) {
+			floor2 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+	
+	public Location getFloor(int i) {
+		if (i == 2) {
+			return floor2;
+		} else {
+			return null;
+		}
 	}
 
 	public void message(final String message) {
@@ -411,6 +463,14 @@ public class Map {
 
 	public String getName() {
 		return this.name;
+	}
+	
+	public List<Location> getButtons(int i) {
+		if (i == 2) {
+			return button2s;
+		} else {
+			return null;
+		}
 	}
 
 	public Map getMap() {

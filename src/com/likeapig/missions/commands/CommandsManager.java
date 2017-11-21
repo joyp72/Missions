@@ -37,6 +37,7 @@ public class CommandsManager implements CommandExecutor
         this.cmds.add(new SetDoor());
         cmds.add(new Skip());
         cmds.add(new Edit());
+        cmds.add(new SetFloor());
     }
     
     public boolean onCommand(final CommandSender sender, final Command cmd, final String arg2, String[] args) {

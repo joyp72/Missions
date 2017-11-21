@@ -29,9 +29,14 @@ public class Edit extends Commands {
 			MessageManager.get().message(sender, "Unknown map.", MessageManager.MessageType.BAD);
 			return;
 		}
-		if (args[1].equalsIgnoreCase("1")) {
+		if (editors.contains(sender)) {
+			editors.remove(sender);
+			MessageManager.get().message(sender, "You have quit editing.");
+			return;
+		}
+		if (args[1].equalsIgnoreCase("2")) {
 			editors.add(sender);
-			edit.put(m, 1);
+			edit.put(m, 2);
 			MessageManager.get().message(sender, "Editing for: " + m.getName());
 			return;
 		} else {

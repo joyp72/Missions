@@ -77,15 +77,31 @@ public class RaidListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
 		HashMap<Map, Integer> edit = MapManager.get().getEdit();
 		List<Player> editors = MapManager.get().getEditors();
-		if (editors.contains(p)) {
+		Map map = MapManager.get().getMap(p);
+		if (editors.contains(p) && map == null) {
 			if (e.getClickedBlock().getType() == Material.STONE_BUTTON && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				MessageManager.get().message(p, "You clicked on a stone button.");
+				if (edit.containsKey(MapManager.get().getMap("test"))) {
+					Map m = MapManager.get().getMap("test");
+					m.setButton(edit.get(m), e.getClickedBlock().getLocation());
+					MessageManager.get().message(p, "You set button 2 for " + m.getName() + ".");
+					return;
+				}
+			}
+		}
+		if (map != null) {
+			if (e.getClickedBlock() != null) {
+				if (map.getButtons(2).contains(e.getClickedBlock().getLocation())) {
+					if (p.getInventory().contains(map.getCard(1))) {
+						p.teleport(map.getFloor(2));
+						return;
+					}
+				}
 			}
 		}
 	}
