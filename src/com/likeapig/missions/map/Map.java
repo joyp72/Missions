@@ -33,6 +33,7 @@ public class Map {
 	private List<NPC> round2;
 	private List<NPC> boss1;
 	private List<Location> doors;
+	private List<Location> b1s;
 	private List<Location> b2s;
 	private Location spawn;
 	private Location bossLoc;
@@ -42,6 +43,7 @@ public class Map {
 	private Location door4;
 	private MapState state;
 	private ItemStack card1;
+	private Location b1f1;
 	private Location b2f1;
 	private Location b2f2;
 	private Location floor2;
@@ -55,6 +57,7 @@ public class Map {
 		boss1 = Mob.get().getBoss(1);
 		this.doors = new ArrayList<Location>();
 		b2s = new ArrayList<Location>();
+		b1s = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
 		floor = 1;
@@ -84,6 +87,9 @@ public class Map {
 		}
 		if (b2f2 != null) {
 			b2s.add(b2f2);
+		}
+		if (b1f1 != null) {
+			b1s.add(b1f1);
 		}
 		this.saveToConfig();
 		this.checkState();
@@ -136,6 +142,9 @@ public class Map {
 		if (b2f2 != null) {
 			Settings.get().set("maps." + this.getName() + ".b2f2", LocationUtils.locationToString(b2f2));
 		}
+		if (b1f1 != null) {
+			Settings.get().set("maps." + this.getName() + ".b1f1", LocationUtils.locationToString(b1f1));
+		}
 		if (floor2 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor2", LocationUtils.locationToString(floor2));
 		}
@@ -180,6 +189,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".b2f1");
 			(this.b2f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.b2f1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".b1f1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".b1f1");
+			(this.b1f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.b1f1.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".b2f2") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".b2f2");
@@ -392,6 +406,22 @@ public class Map {
 		this.checkState();
 		this.saveToConfig();
 	}
+	
+	public void setButton1(int i, Location l) {
+		if (i == 1) {
+			b1f1 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+	
+	public Location getButton1(int i) {
+		if (i == 1) {
+			return b1f1;
+		} else {
+			return null;
+		}
+	}
 
 	public void setButton2(int i, Location l) {
 		if (i == 1) {
@@ -520,7 +550,9 @@ public class Map {
 	}
 
 	public List<Location> getButtons(int i) {
-		if (i == 2) {
+		if (i == 1) {
+			return b1s;
+		} if (i == 2) {
 			return b2s;
 		} else {
 			return null;

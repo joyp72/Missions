@@ -36,16 +36,22 @@ public class Edit extends Commands {
 		}
 		if (args[1].equalsIgnoreCase("21")) {
 			editors.add(sender);
-			edit.put(m, 1);
-			MessageManager.get().message(sender, "Editing for: " + m.getName());
+			edit.put(m, 21);
+			MessageManager.get().message(sender, "Editing button 2, floor 1 for: " + m.getName());
 			return;
 		}
 		if (args[1].equalsIgnoreCase("22")) {
 			editors.add(sender);
-			edit.put(m, 2);
-			MessageManager.get().message(sender, "Editing for: " + m.getName());
+			edit.put(m, 23);
+			MessageManager.get().message(sender, "Editing button 2, floor 3 for: " + m.getName());
 			return;
-		}else {
+		}
+		if (args[1].equalsIgnoreCase("11")) {
+			editors.add(sender);
+			edit.put(m, 11);
+			MessageManager.get().message(sender, "Editing button 1, floor 2 for: " + m.getName());
+			return;
+		} else {
 			MessageManager.get().message(sender, "Bad Input", MessageType.BAD);
 			return;
 		}
