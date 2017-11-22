@@ -18,6 +18,7 @@ public class Test extends Commands {
 		Player p = sender;
 
 		Boss.get().Chair(p.getLocation(), p);
+		Boss.get().setNPC(p.getLocation());
 		
 		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
 			

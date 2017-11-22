@@ -7,12 +7,17 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.EulerAngle;
 
 import com.likeapig.missions.models.LawnMower;
+
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
 
 public class Boss {
 
@@ -23,6 +28,8 @@ public class Boss {
 
 	private HashMap<String, ArmorStand> parts = new HashMap<>();
 	Location chairLoc;
+	NPCRegistry registry = CitizensAPI.getNPCRegistry();
+	NPC npc;
 
 	static {
 		instance = new Boss();
@@ -44,6 +51,28 @@ public class Boss {
 		return parts;
 	}
 	
+	public void setNPC(Location l) {
+		npc = this.registry.createNPC(EntityType.PLAYER, "Robot");
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
+		npc.spawn(l);
+		getParts().get("body2").setPassenger(npc.getEntity());
+	}
+	
+	public void setNPCYaw(Location l) {
+		npc.getEntity().getLocation().setYaw(l.getYaw());
+	}
+	
+	public void tpSeat(ArmorStand as, Location loc) {
+		if (as.getPassenger() != null) {
+			Entity e = as.getPassenger();
+			as.eject();
+			as.teleport(loc);
+			e.teleport(loc);
+			as.setPassenger(e);
+			e.getLocation().setYaw(loc.getYaw());
+		}
+	}
+	
 	public Location rotateRight() {
 		Location origin = getChairLoc();
 		Location vec = null;
@@ -58,6 +87,7 @@ public class Boss {
 			point.setYaw(point.getYaw() + degrees);
 			point.setPitch(point.getPitch());
 			entity.teleport(point);
+			tpSeat(entity, point);
 		}
 		return vec;
 	}
