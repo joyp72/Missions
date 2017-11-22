@@ -1,11 +1,10 @@
 package com.likeapig.missions.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.likeapig.missions.map.Map;
-import com.likeapig.missions.map.MapManager;
-import com.likeapig.missions.map.Mob;
-import com.likeapig.missions.models.LawnMower;
+import com.likeapig.missions.Main;
+import com.likeapig.missions.map.Boss;
 
 public class Test extends Commands {
 	public Test() {
@@ -18,13 +17,14 @@ public class Test extends Commands {
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
 
-		if (i == 0) {
-			LawnMower.get().spawnMower(p.getLocation().add(0, 2, 0), p);
-			i++;
-		} else {
-			LawnMower.get().removeMower();
-			i = 0;
-		}
-
+		Boss.get().Chair(p.getLocation(), p);
+		
+		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+			
+			@Override
+			public void run() {
+				Boss.get().rotateRight();
+			}
+		}, 0L, 2L);
 	}
 }

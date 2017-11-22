@@ -12,9 +12,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.EulerAngle;
 
+import com.likeapig.missions.models.LawnMower;
+
 public class Boss {
 
 	public static Boss instance;
+	private double sinus = 0.08715574274765817;
+	private double cosinus = 0.9961946980917455;
+	private float degrees = 5;
 
 	private HashMap<String, ArmorStand> parts = new HashMap<>();
 	Location chairLoc;
@@ -37,6 +42,24 @@ public class Boss {
 	
 	public HashMap<String, ArmorStand> getParts() {
 		return parts;
+	}
+	
+	public Location rotateRight() {
+		Location origin = getChairLoc();
+		Location vec = null;
+		for (ArmorStand entity : getParts().values()) {
+			Location point = entity.getLocation();
+			point = point.subtract(origin);
+			double x = point.getX() * cosinus - point.getZ() * sinus;
+			double y = point.getZ() * cosinus + point.getX() * sinus;
+			point.setX(x);
+			point.setZ(y);
+			point = point.add(origin);
+			point.setYaw(point.getYaw() + degrees);
+			point.setPitch(point.getPitch());
+			entity.teleport(point);
+		}
+		return vec;
 	}
 
 	public ArmorStand NewArmorStand(Location location, boolean visible, boolean mini) {
@@ -99,8 +122,6 @@ public class Boss {
 
 	public void Chair(Location location, Player p) {
 		
-		chairLoc = location;
-		
 		Location l = location.clone();
 		Location la = l.clone().subtract(0.53, 0, 0).add(0, 1.3, 0);
 		Location ra = la.clone().add(2.3, 0, 0);
@@ -112,7 +133,8 @@ public class Boss {
 
 		ArmorStand body2 = NewArmorStand(l.clone().add(0.62, 0, 0), false, false);
 		body2.setHelmet(new ItemStack(Material.QUARTZ_BLOCK, 1, (byte)1));
-		body2.setPassenger(p);
+		//body2.setPassenger(p);
+		chairLoc = body2.getLocation(); 
 		
 		ArmorStand body3 = NewArmorStand(l.clone().add(1.24, 0, 0), false, false);
 		body3.setHelmet(new ItemStack(Material.QUARTZ_BLOCK, 1, (byte)1));

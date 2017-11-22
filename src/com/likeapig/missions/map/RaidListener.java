@@ -32,18 +32,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class RaidListener implements Listener {
 	private static RaidListener instance;
-	private List<NPC> round1;
-	private List<NPC> round2;
-	private NPCRegistry registry = CitizensAPI.getNPCRegistry();
-	private Map map = MapManager.get().getMap("test");
 
 	static {
 		RaidListener.instance = new RaidListener();
 	}
 
 	public RaidListener() {
-		this.round1 = Mob.get().getRound(1);
-		round2 = Mob.get().getRound(2);
 	}
 
 	public static RaidListener get() {
