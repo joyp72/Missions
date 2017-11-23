@@ -31,7 +31,7 @@ public class Map {
 	private int floor;
 	private List<NPC> round1;
 	private List<NPC> round2;
-	private List<NPC> boss1;
+	private HashMap<Integer, NPC> boss;
 	private List<Location> doors;
 	private List<Location> b1s;
 	private List<Location> b2s;
@@ -48,18 +48,20 @@ public class Map {
 	private Location b2f2;
 	private Location floor2;
 	private Location floor1;
+	private boolean locked;
 	NPCRegistry registry;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
 		this.round1 = Mob.get().getRound(1);
 		round2 = Mob.get().getRound(2);
-		boss1 = Mob.get().getBoss(1);
+		boss = Mob.get().getBoss();
 		this.doors = new ArrayList<Location>();
 		b2s = new ArrayList<Location>();
 		b1s = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
+		locked = false;
 		floor = 1;
 		round = 1;
 		card1 = new ItemStack(Material.PAPER);
@@ -105,11 +107,12 @@ public class Map {
 			round2.remove(npc);
 			registry.deregister(npc);
 		}
-		if (boss1.contains(npc)) {
-			boss1.remove(npc);
+		if (boss.containsValue(npc)) {
+			boss.clear();
 			registry.deregister(npc);
 			getPlayer().getInventory().addItem(card1);
 			message("You picked up a Keycard!");
+			setLocked(false);
 		}
 		if (getRound() == 1 && round1.size() == 0) {
 			message("A guard has been deployed.");
@@ -269,6 +272,7 @@ public class Map {
 	}
 
 	public void firstRound() {
+		setLocked(true);
 		Mob.get().spawnRound1(door1);
 		Mob.get().spawnRound1(door2);
 		Mob.get().spawnRound1(door3);
@@ -378,10 +382,10 @@ public class Map {
 					registry.deregister(NPCs);
 				}
 				round2.clear();
-				for (NPC NPCs : boss1) {
+				for (NPC NPCs : boss.values()) {
 					registry.deregister(NPCs);
 				}
-				boss1.clear();
+				boss.clear();
 				setRound(1);
 			}
 		}, 1);
@@ -517,6 +521,14 @@ public class Map {
 
 	public boolean containsNPC(NPC npc) {
 		return round1.contains(npc) || round2.contains(npc) || boss1.contains(npc);
+	}
+	
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	public void setLocked(boolean b) {
+		locked = b;
 	}
 
 	public List<NPC> getRoundNPC(int i) {

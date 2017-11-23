@@ -107,26 +107,29 @@ public class RaidListener implements Listener {
 			}
 		}
 		if (map != null) {
-			if (e.getClickedBlock() != null) {
-				if (map.getButtons(2).contains(e.getClickedBlock().getLocation())) {
-					if (p.getInventory().contains(map.getCard(1))) {
-						if (map.getFloor() == 1) {
-							p.teleport(map.getFloor(2));
-							map.setFloor(2);
-							return;
-						}
-						if (map.getFloor() == 3) {
-							p.teleport(map.getFloor(2));
-							map.setFloor(2);
-							return;
+			if (!map.isLocked()) {
+				if (e.getClickedBlock() != null) {
+					if (map.getButtons(2).contains(e.getClickedBlock().getLocation())) {
+						if (p.getInventory().contains(map.getCard(1))) {
+							if (map.getFloor() == 1) {
+								p.teleport(map.getFloor(2));
+								map.setFloor(2);
+								map.setLocked(true);
+								return;
+							}
+							if (map.getFloor() == 3) {
+								p.teleport(map.getFloor(2));
+								map.setFloor(2);
+								return;
+							}
 						}
 					}
-				}
-				if (map.getButtons(1).contains(e.getClickedBlock().getLocation())) {
-					if (map.getFloor() == 2) {
-						p.teleport(map.getFloor(1));
-						map.setFloor(1);
-						return;
+					if (map.getButtons(1).contains(e.getClickedBlock().getLocation())) {
+						if (map.getFloor() == 2) {
+							p.teleport(map.getFloor(1));
+							map.setFloor(1);
+							return;
+						}
 					}
 				}
 			}
@@ -146,7 +149,7 @@ public class RaidListener implements Listener {
 				if (Mob.get().getRound(2).contains(npc)) {
 					e.setDamage(5);
 				}
-				if (Mob.get().getBoss(1).contains(npc)) {
+				if (m.getBoss(1).contains(npc)) {
 					if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
 						e.setDamage(6);
 						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));

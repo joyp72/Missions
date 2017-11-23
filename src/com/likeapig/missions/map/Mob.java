@@ -1,18 +1,26 @@
 package com.likeapig.missions.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Evoker;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -23,7 +31,7 @@ public class Mob {
 	Evoker ev;
 	private List<NPC> round1;
 	private List<NPC> round2;
-	private List<NPC> boss1;
+	private HashMap<Integer, NPC> boss;
 	Location loc;
 	NPCRegistry registry;
 	ItemStack bossStick;
@@ -45,20 +53,20 @@ public class Mob {
 			return null;
 		}
 	}
+
+	public NPC getBoss(int i) {
+		return boss.get(i);
+	}
 	
-	public List<NPC> getBoss(int i) {
-		if (i == 1) {
-			return boss1;
-		} else {
-			return null;
-		}
+	public HashMap<Integer, NPC> getBoss() {
+		return boss;
 	}
 
 	private Mob() {
 		this.registry = CitizensAPI.getNPCRegistry();
 		round1 = new ArrayList<NPC>();
 		round2 = new ArrayList<NPC>();
-		boss1 = new ArrayList<NPC>();
+		boss = new HashMap<Integer, NPC>();
 		bossStick = new ItemStack(Material.STICK);
 		{
 			ItemMeta meta = bossStick.getItemMeta();
@@ -68,12 +76,19 @@ public class Mob {
 		}
 	}
 
-	public void Floor1Boss(final Location loc) {
+	public void Floor2Boss(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "T-2000");
+		npc.addTrait(MiniTrait.class);
+		npc.data().set(NPC.GLOWING_METADATA, true);
+		boss.put(2, npc);
+		npc.spawn(loc);
+	}
 
+	public void Floor1Boss(final Location loc) {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
 		npc.addTrait(MissionTrait.class);
 		npc.data().set(NPC.GLOWING_METADATA, true);
-		boss1.add(npc);
+		boss.put(1, npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
 			Damageable entity = (Damageable) npc.getEntity();
@@ -96,8 +111,39 @@ public class Mob {
 		round2.add(npc);
 		npc.spawn(loc);
 	}
-	
+
 	public ItemStack getBossStick() {
 		return bossStick;
+	}
+
+	public static List<Entity> getEntitiesAroundPoint(Location location, double radius) {
+		List<Entity> entities = new ArrayList<Entity>();
+		World world = location.getWorld();
+
+		int smallX = (int) (location.getX() - radius) >> 4;
+		int bigX = (int) (location.getX() + radius) >> 4;
+		int smallZ = (int) (location.getZ() - radius) >> 4;
+		int bigZ = (int) (location.getZ() + radius) >> 4;
+
+		for (int x = smallX; x <= bigX; x++) {
+			for (int z = smallZ; z <= bigZ; z++) {
+				if (world.isChunkLoaded(x, z)) {
+					entities.addAll(Arrays.asList(world.getChunkAt(x, z).getEntities()));
+				}
+			}
+		}
+
+		Iterator<Entity> entityIterator = entities.iterator();
+		while (entityIterator.hasNext()) {
+			Entity e = entityIterator.next();
+			if (e.getWorld().equals(location.getWorld())
+					&& e.getLocation().distanceSquared(location) > radius * radius) {
+				entityIterator.remove();
+			} else if (e instanceof Player && ((Player) e).getGameMode().equals(GameMode.SPECTATOR)) {
+				entityIterator.remove();
+			}
+		}
+
+		return entities;
 	}
 }

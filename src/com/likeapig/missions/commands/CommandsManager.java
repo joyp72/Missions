@@ -38,6 +38,7 @@ public class CommandsManager implements CommandExecutor
         cmds.add(new Skip());
         cmds.add(new Edit());
         cmds.add(new SetFloor());
+        cmds.add(new Glide());
     }
     
     public boolean onCommand(final CommandSender sender, final Command cmd, final String arg2, String[] args) {

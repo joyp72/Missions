@@ -10,6 +10,7 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.likeapig.missions.commands.CommandsManager;
 import com.likeapig.missions.map.Boss;
 import com.likeapig.missions.map.MapManager;
+import com.likeapig.missions.map.MiniTrait;
 import com.likeapig.missions.map.MissionTrait;
 import com.likeapig.missions.map.RaidListener;
 import com.likeapig.missions.models.LawnMower;
@@ -35,17 +36,13 @@ public class Main extends JavaPlugin {
 		MapManager.get().setupMaps();
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MissionTrait.class));
+		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));
+		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MiniTrait.class));
 		new Boss();
 		new LawnMower();
 	}
 
 	public void onDisable() {
-		if (Boss.class != null) {
-			Boss.get().removeChair();
-		}
-		if (LawnMower.class != null) {
-			LawnMower.get().removeMower();
-		}
 		this.getLogger().info("Disabled!");
 	}
 }

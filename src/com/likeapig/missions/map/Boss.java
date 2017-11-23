@@ -25,6 +25,7 @@ public class Boss {
 	private double sinus = 0.08715574274765817;
 	private double cosinus = 0.9961946980917455;
 	private float degrees = 5;
+	
 
 	private HashMap<String, ArmorStand> parts = new HashMap<>();
 	Location chairLoc;

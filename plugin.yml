@@ -2,7 +2,7 @@ name: Missions
 author: likeapig
 version: 0.0.1
 main: com.likeapig.missions.Main
-depend: [Citizens, ProtocolLib]
+depend: [Citizens, ProtocolLib, FurnitureLib]
 
 commands:
   ra:
