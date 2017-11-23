@@ -17,12 +17,8 @@ public class Join extends Commands
             return;
         }
         final Map a2 = MapManager.get().getMap("test");
-        if (a2.getSpawn() == null) {
-            MessageManager.get().message(sender, String.valueOf(a2.getName()) + " doesn't have a spawn set!", MessageManager.MessageType.BAD);
-            return;
-        }
-        if (a2.getBossLoc() == null) {
-            MessageManager.get().message(sender, String.valueOf(a2.getName()) + " doesn't have a Boss set!", MessageManager.MessageType.BAD);
+        if (a2.getStateName().equals("STOPPED")) {
+            MessageManager.get().message(sender, String.valueOf(a2.getName()) + " doesn't have some loc set!", MessageManager.MessageType.BAD);
             return;
         }
         if (args.length == 0) {

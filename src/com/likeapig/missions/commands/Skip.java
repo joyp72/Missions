@@ -1,9 +1,7 @@
 package com.likeapig.missions.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.likeapig.missions.map.Boss;
 import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
 
@@ -35,16 +33,17 @@ public class Skip extends Commands {
 			return;
 		}
 		if (m.getRound() == 2) {
-			for (NPC boss : m.getBoss(1)) {
+			for (NPC boss : m.getBoss().values()) {
 				registry.deregister(boss);
 			}
-			m.getBoss(1).clear();
+			m.getBoss().clear();
 			for (NPC npcs : m.getRoundNPC(2)) {
 				registry.deregister(npcs);
 			}
 			m.getRoundNPC(2).clear();
 			m.getPlayer().getInventory().addItem(m.getCard(1));
 			m.message("You picked up a Keycard!");
+			m.setLocked(false);
 			return;
 		}
 

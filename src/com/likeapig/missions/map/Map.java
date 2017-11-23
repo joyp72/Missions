@@ -37,6 +37,7 @@ public class Map {
 	private List<Location> b2s;
 	private Location spawn;
 	private Location bossLoc;
+	private Location bossLoc2;
 	private Location door1;
 	private Location door2;
 	private Location door3;
@@ -127,6 +128,9 @@ public class Map {
 		if (this.bossLoc != null) {
 			Settings.get().set("maps." + this.getName() + ".bossLoc", LocationUtils.locationToString(this.bossLoc));
 		}
+		if (this.bossLoc2 != null) {
+			Settings.get().set("maps." + this.getName() + ".bossLoc2", LocationUtils.locationToString(this.bossLoc2));
+		}
 		if (this.door1 != null) {
 			Settings.get().set("maps." + this.getName() + ".door1", LocationUtils.locationToString(this.door1));
 		}
@@ -167,6 +171,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".bossLoc");
 			(this.bossLoc = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.bossLoc.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".bossLoc2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".bossLoc2");
+			(this.bossLoc2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.bossLoc2.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".door1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".door1");
@@ -237,6 +246,9 @@ public class Map {
 		if (this.bossLoc == null) {
 			flag = true;
 		}
+		if (this.bossLoc2 == null) {
+			flag = true;
+		}
 		if (this.door1 == null) {
 			flag = true;
 		}
@@ -302,6 +314,10 @@ public class Map {
 				Mob.get().Floor1Boss(bossLoc);
 			}
 		}, 2);
+	}
+	
+	public void miniBoss() {
+		 
 	}
 
 	public int getRound() {
@@ -405,10 +421,17 @@ public class Map {
 		this.saveToConfig();
 	}
 
-	public void setBossLoc(final Location l) {
-		this.bossLoc = l;
-		this.checkState();
-		this.saveToConfig();
+	public void setBossLoc(int i,  Location l) {
+		if (i == 1) {
+			bossLoc = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 2) {
+			bossLoc2 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 	
 	public void setButton1(int i, Location l) {
@@ -464,8 +487,15 @@ public class Map {
 		this.saveToConfig();
 	}
 
-	public Location getBossLoc() {
-		return this.bossLoc;
+	public Location getBossLoc(int i) {
+		if (i == 1) {
+			return bossLoc;
+		}
+		if (i == 2) {
+			return bossLoc2;
+		} else {
+			return null;
+		}
 	}
 
 	public Location get2ButtonLoc(int i) {
@@ -520,7 +550,7 @@ public class Map {
 	}
 
 	public boolean containsNPC(NPC npc) {
-		return round1.contains(npc) || round2.contains(npc) || boss1.contains(npc);
+		return round1.contains(npc) || round2.contains(npc) || boss.containsValue(npc);
 	}
 	
 	public boolean isLocked() {
@@ -541,12 +571,12 @@ public class Map {
 		}
 	}
 
-	public List<NPC> getBoss(int i) {
-		if (i == 1) {
-			return boss1;
-		} else {
-			return null;
-		}
+	public NPC getBoss(int i) {
+		return boss.get(i);
+	}
+	
+	public HashMap<Integer, NPC> getBoss() {
+		return boss;
 	}
 
 	public ItemStack getCard(int i) {

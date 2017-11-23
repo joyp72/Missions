@@ -23,6 +23,9 @@ public class Edit extends Commands {
 			MessageManager.get().message(sender, "You must specify a map!", MessageManager.MessageType.BAD);
 			return;
 		}
+		if (args.length == 1) {
+			MessageManager.get().message(sender, "You must specify an int", MessageType.BAD);
+		}
 		final String id = args[0];
 		final Map m = MapManager.get().getMap(id);
 		if (m == null) {

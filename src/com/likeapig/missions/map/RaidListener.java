@@ -149,11 +149,13 @@ public class RaidListener implements Listener {
 				if (Mob.get().getRound(2).contains(npc)) {
 					e.setDamage(5);
 				}
-				if (m.getBoss(1).contains(npc)) {
-					if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
-						e.setDamage(6);
-						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
-						p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
+				if (m.getBoss().containsValue(npc)) {
+					if (m.getBoss().get(1).equals(npc)) {
+						if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
+							e.setDamage(6);
+							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
+							p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
+						}
 					}
 				}
 			}
