@@ -116,7 +116,7 @@ public class Mob {
 		return bossStick;
 	}
 
-	public static List<Entity> getEntitiesAroundPoint(Location location, double radius) {
+	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {
 		List<Entity> entities = new ArrayList<Entity>();
 		World world = location.getWorld();
 

@@ -1,5 +1,15 @@
 package com.likeapig.missions.map;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,6 +68,19 @@ public class MiniTrait extends Trait {
 	// Called every tick
 	@Override
 	public void run() {
+		if (npc.isSpawned()) {
+			for (Entity entity : getEntitiesAroundPoint(npc.getEntity().getLocation(), 4.0)) {
+				if (map.getPlayer() != null) {
+					if (entity.getUniqueId() == map.getPlayer().getUniqueId()) {
+						Player p = (Player) entity;
+						npc.getNavigator().setPaused(true);
+						npc.faceLocation(p.getLocation());
+					} else {
+						//npc.getNavigator().setPaused(false);
+					}
+				}
+			}
+		}
 	}
 
 	// Run code when your trait is attached to a NPC.
@@ -68,7 +91,7 @@ public class MiniTrait extends Trait {
 		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
 		npc.data().set(NPC.DROPS_ITEMS_METADATA, false);
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "z_kris_z");
-		
+
 	}
 
 	// Run code when the NPC is despawned. This is called before the entity actually
@@ -82,11 +105,44 @@ public class MiniTrait extends Trait {
 	// This is called AFTER onAttach and AFTER Load when the server is started.
 	@Override
 	public void onSpawn() {
+		npc.getNavigator().setTarget(map.getPlayer(), true);
+
 	}
 
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.
 	@Override
 	public void onRemove() {
+	}
+
+	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {
+		List<Entity> entities = new ArrayList<Entity>();
+		World world = location.getWorld();
+
+		int smallX = (int) (location.getX() - radius) >> 4;
+		int bigX = (int) (location.getX() + radius) >> 4;
+		int smallZ = (int) (location.getZ() - radius) >> 4;
+		int bigZ = (int) (location.getZ() + radius) >> 4;
+
+		for (int x = smallX; x <= bigX; x++) {
+			for (int z = smallZ; z <= bigZ; z++) {
+				if (world.isChunkLoaded(x, z)) {
+					entities.addAll(Arrays.asList(world.getChunkAt(x, z).getEntities()));
+				}
+			}
+		}
+
+		Iterator<Entity> entityIterator = entities.iterator();
+		while (entityIterator.hasNext()) {
+			Entity e = entityIterator.next();
+			if (e.getWorld().equals(location.getWorld())
+					&& e.getLocation().distanceSquared(location) > radius * radius) {
+				entityIterator.remove();
+			} else if (e instanceof Player && ((Player) e).getGameMode().equals(GameMode.SPECTATOR)) {
+				entityIterator.remove();
+			}
+		}
+
+		return entities;
 	}
 
 }

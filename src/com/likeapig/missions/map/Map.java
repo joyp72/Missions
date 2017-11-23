@@ -280,7 +280,9 @@ public class Map {
 
 	public void start() {
 		this.setState(MapState.STARTED);
-		this.firstRound();
+		//this.firstRound();
+		getPlayer().teleport(floor2);
+		miniBoss();
 	}
 
 	public void firstRound() {
@@ -317,7 +319,7 @@ public class Map {
 	}
 	
 	public void miniBoss() {
-		 
+		 Mob.get().Floor2Boss(bossLoc2);
 	}
 
 	public int getRound() {
