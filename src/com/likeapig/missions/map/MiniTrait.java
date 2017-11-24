@@ -9,9 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -37,10 +40,25 @@ public class MiniTrait extends Trait {
 	Map map = MapManager.get().getMap("test");
 	Player p = map.getPlayer();
 	Boolean charged = false;
-	Location shot;
 	int t = 0;
 	ConcurrentHashMap<Location, Vector> locs = new ConcurrentHashMap<Location, Vector>();
 	HashMap<Location, Integer> ranges = new HashMap<Location, Integer>();
+
+	Location loc;
+	Vector vec;
+
+	Location loc2;
+	Vector vec2;
+	
+	private ItemStack diamond = new ItemStack(Material.DIAMOND_CHESTPLATE);
+	private ItemStack gold = new ItemStack(Material.GOLD_CHESTPLATE);
+	private ItemStack iron = new ItemStack(Material.IRON_CHESTPLATE);
+
+	boolean locReached = false;
+	boolean isBlocking = false;
+	boolean checkBlock = false;
+	boolean damaged = false;
+	boolean show = true;
 
 	boolean SomeSetting = false;
 
@@ -73,14 +91,10 @@ public class MiniTrait extends Trait {
 		if (npc.isSpawned()) {
 			t++;
 			setCharge(t, npc.getEntity().getLocation());
-			if (t == 160) {
-				charged = true;
-				fireShot();
-			}
 			if (p != null) {
 				if (npc.getEntity().getLocation().distance(p.getLocation()) <= 6) {
 					npc.getNavigator().cancelNavigation();
-					npc.faceLocation(p.getLocation());
+					npc.faceLocation(p.getLocation().subtract(0, 1, 0));
 				} else {
 					npc.getNavigator().setTarget(p, true);
 				}
@@ -107,41 +121,68 @@ public class MiniTrait extends Trait {
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ff7400");
 			}
-			if (t >= 120&& t < 160) {
+			if (t >= 120 && t < 160) {
 				Location loc = l.clone().add(0.0, 1.6, 0);
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ff2700");
 			}
+			if (t == 160) {
+				loc = npc.getEntity().getLocation().add(0, 1.6, 0);
+				vec = loc.getDirection();
+				loc2 = p.getLocation().add(0, 1, 0);
+				vec2 = getDirection(loc2, npc.getEntity().getLocation().add(0, 1, 0));
+			}
+			if (t > 160 && t < 320) {
+				fireShot();
+				if (loc.distance(p.getLocation()) <= 2) {
+					locReached = true;
+				}
+				if (locReached) {
+					if (!checkBlock) {
+						if (p.isBlocking()) {
+							isBlocking = true;
+							checkBlock = true;
+						} else {
+							isBlocking = false;
+							checkBlock = true;
+						}
+					}
+					if (checkBlock && isBlocking) {
+						fireShotBack();
+						if (loc2.distance(npc.getEntity().getLocation()) <= 2) {
+							((Damageable) npc.getEntity()).damage(4);
+							show = false;
+						}
+					}
+					if (checkBlock && !damaged && !isBlocking) {
+						p.damage(12);
+						show = false;
+						damaged = true;
+					}
+				}
+			}
+		}
+		if (t >= 320) {
+			locReached = false;
+			checkBlock = false;
+			show = true;
+			this.t = 0;
 		}
 	}
 
 	public void fireShot() {
-		if (charged) {
-			shot = npc.getEntity().getLocation().clone().add(0.0, 1.6, 0.0);
-			Vector direction = shot.getDirection().clone();
-			locs.put(shot, direction);
-			ranges.put(shot, 0);
-			for (Location loc : locs.keySet()) {
-				Vector next = locs.get(loc);
-				if (ranges.get(loc) == null) {
-					continue;
-				}
-				int range = ranges.get(loc);
-				if (ranges.get(loc) > 10) {
-					ranges.remove(loc);
-					locs.remove(loc);
-				}
-				else {
-					displayColoredParticle(loc, "E41B17", 0.0f, 0.0f, 0.0f);
-					Location nextLoc = loc.add(next);
-					locs.remove(loc);
-					locs.put(nextLoc, next);
-					ranges.remove(loc);
-					ranges.put(nextLoc, range + 1);
-				}
-			}
-			charged = false;
-			t = 0;
+		loc.add(vec.normalize().multiply(0.8));
+		if (show) {
+			displayColoredParticle(loc, "E41B17", 0.0f, 0.0f, 0.0f);
+			ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+		}
+	}
+
+	public void fireShotBack() {
+		loc2.add(vec2.normalize().multiply(0.8));
+		if (show) {
+			displayColoredParticle(loc2, "E41B17", 0.0f, 0.0f, 0.0f);
+			ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 25);
 		}
 	}
 
@@ -174,6 +215,21 @@ public class MiniTrait extends Trait {
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.
 	@Override
 	public void onRemove() {
+	}
+
+	public static Vector getDirection(Location location, Location destination) {
+		double x1, y1, z1;
+		double x0, y0, z0;
+
+		x1 = destination.getX();
+		y1 = destination.getY();
+		z1 = destination.getZ();
+
+		x0 = location.getX();
+		y0 = location.getY();
+		z0 = location.getZ();
+
+		return new Vector(x1 - x0, y1 - y0, z1 - z0);
 	}
 
 	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {

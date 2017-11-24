@@ -19,10 +19,10 @@ public class Test extends Commands {
 		Player p = sender;
 		
 		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
-			
+			Location loc = p.getLocation().clone().add(0.0, 1.6, 0);
 			@Override
 			public void run() {
-				Location loc = p.getLocation().clone().add(0.0, 1.6, 0);
+				
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ffb90f");
 			}
