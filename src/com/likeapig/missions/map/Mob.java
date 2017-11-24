@@ -22,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
+import com.likeapig.missions.utils.ParticleEffect;
+
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
@@ -57,9 +59,16 @@ public class Mob {
 	public NPC getBoss(int i) {
 		return boss.get(i);
 	}
-	
+
 	public HashMap<Integer, NPC> getBoss() {
 		return boss;
+	}
+
+	public void fireShot(Location loc) {
+		Location l = loc.add(0.0, 1.0, 0.0);
+		Vector direction = l.getDirection();
+		l = l.add(direction.multiply(1));
+		displayColoredParticle(l, "E41B17", 0.0f, 0.0f, 0.0f);
 	}
 
 	private Mob() {
@@ -145,5 +154,95 @@ public class Mob {
 		}
 
 		return entities;
+	}
+
+	public static void displayColoredParticle(Location loc, ParticleEffect type, String hexVal, float xOffset,
+			float yOffset, float zOffset) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+
+		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
+		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
+		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
+
+		if (type == ParticleEffect.RED_DUST || type == ParticleEffect.REDSTONE) {
+			ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 255.0);
+		} else if (type == ParticleEffect.SPELL_MOB || type == ParticleEffect.MOB_SPELL) {
+			ParticleEffect.SPELL_MOB.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc, 255.0);
+		} else if (type == ParticleEffect.SPELL_MOB_AMBIENT || type == ParticleEffect.MOB_SPELL_AMBIENT) {
+			ParticleEffect.SPELL_MOB_AMBIENT.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc,
+					255.0);
+		} else {
+			ParticleEffect.RED_DUST.display(0, 0, 0, 0.004F, 0, loc, 255.0D);
+		}
+	}
+
+	public static void displayColoredParticle(Location loc, String hexVal) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
+	}
+
+	public static void displayColoredParticle(Location loc, String hexVal, float xOffset, float yOffset,
+			float zOffset) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+
+		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
+		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
+		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
+
+		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
 	}
 }
