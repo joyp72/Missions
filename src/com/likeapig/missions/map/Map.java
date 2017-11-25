@@ -1,28 +1,30 @@
 package com.likeapig.missions.map;
 
-import org.bukkit.*;
-import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-
-import com.likeapig.missions.*;
-import com.likeapig.missions.utils.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.bukkit.entity.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.mcmonkey.sentinel.SentinelTarget;
-import org.mcmonkey.sentinel.SentinelTrait;
 
-import net.citizensnpcs.api.npc.NPC;
+import com.likeapig.missions.Main;
+import com.likeapig.missions.Settings;
+import com.likeapig.missions.commands.MessageManager;
+import com.likeapig.missions.commands.MessageManager.MessageType;
+import com.likeapig.missions.utils.LocationUtils;
+
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCDeathEvent;
+import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
-import com.likeapig.missions.commands.*;
-import com.likeapig.missions.commands.MessageManager.MessageType;
 
 public class Map {
 	private String name;
@@ -31,10 +33,12 @@ public class Map {
 	private int floor;
 	private List<NPC> round1;
 	private List<NPC> round2;
+	private List<NPC> round3;
 	private HashMap<Integer, NPC> boss;
 	private List<Location> doors;
 	private List<Location> b1s;
 	private List<Location> b2s;
+	private List<Location> b3s;
 	private Location spawn;
 	private Location bossLoc;
 	private Location bossLoc2;
@@ -44,24 +48,31 @@ public class Map {
 	private Location door4;
 	private MapState state;
 	private ItemStack card1;
+	private ItemStack card2;
+	private Location b3f1;
 	private Location b1f1;
 	private Location b2f1;
 	private Location b2f2;
+	private Location floor3;
 	private Location floor2;
 	private Location floor1;
 	private boolean locked;
+	private boolean first;
 	NPCRegistry registry;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
 		this.round1 = Mob.get().getRound(1);
 		round2 = Mob.get().getRound(2);
+		round3 = Mob.get().getRound(3);
 		boss = Mob.get().getBoss();
 		this.doors = new ArrayList<Location>();
 		b2s = new ArrayList<Location>();
+		b3s = new ArrayList<Location>();
 		b1s = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
+		first = true;
 		locked = false;
 		floor = 1;
 		round = 1;
@@ -77,6 +88,19 @@ public class Map {
 			meta.addItemFlags(ItemFlag.values());
 			card1.setItemMeta(meta);
 			card1.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
+		}
+		card2 = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = card2.getItemMeta();
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Keycard");
+			ArrayList<String> lore = new ArrayList<>();
+			lore.add(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Mission Item)");
+			lore.add("");
+			lore.add(ChatColor.GRAY + "Used to access 3nd Floor.");
+			meta.setLore(lore);
+			meta.addItemFlags(ItemFlag.values());
+			card2.setItemMeta(meta);
+			card2.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		}
 		this.loadFromConfig();
 		if (this.door1 != null && this.door2 != null && this.door3 != null && this.door4 != null) {
@@ -94,6 +118,9 @@ public class Map {
 		if (b1f1 != null) {
 			b1s.add(b1f1);
 		}
+		if (b3f1 != null) {
+			b3s.add(b3f1);
+		}
 		this.saveToConfig();
 		this.checkState();
 	}
@@ -108,12 +135,24 @@ public class Map {
 			round2.remove(npc);
 			registry.deregister(npc);
 		}
-		if (boss.containsValue(npc)) {
-			boss.clear();
+		if (round3.contains(npc)) {
+			round3.remove(npc);
 			registry.deregister(npc);
-			getPlayer().getInventory().addItem(card1);
-			message("You picked up a Keycard!");
-			setLocked(false);
+		}
+		if (boss.containsValue(npc)) {
+			if (npc.hasTrait(MiniTrait.class)) {
+				boss.clear();
+				registry.deregister(npc);
+				getPlayer().getInventory().addItem(card2);
+				message("You picked up a new Keycard!");
+				setLocked(false);
+			} else {
+				boss.clear();
+				registry.deregister(npc);
+				getPlayer().getInventory().addItem(card1);
+				message("You picked up a Keycard!");
+				setLocked(false);
+			}
 		}
 		if (getRound() == 1 && round1.size() == 0) {
 			message("A guard has been deployed.");
@@ -152,8 +191,14 @@ public class Map {
 		if (b1f1 != null) {
 			Settings.get().set("maps." + this.getName() + ".b1f1", LocationUtils.locationToString(b1f1));
 		}
+		if (b3f1 != null) {
+			Settings.get().set("maps." + this.getName() + ".b3f1", LocationUtils.locationToString(b3f1));
+		}
 		if (floor2 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor2", LocationUtils.locationToString(floor2));
+		}
+		if (floor3 != null) {
+			Settings.get().set("maps." + this.getName() + ".floor3", LocationUtils.locationToString(floor3));
 		}
 		if (floor1 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor1", LocationUtils.locationToString(floor1));
@@ -207,6 +252,11 @@ public class Map {
 			(this.b1f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.b1f1.setYaw(LocationUtils.stringToYaw(s3));
 		}
+		if (s.get("maps." + this.getName() + ".b3f1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".b3f1");
+			(this.b3f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.b3f1.setYaw(LocationUtils.stringToYaw(s3));
+		}
 		if (s.get("maps." + this.getName() + ".b2f2") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".b2f2");
 			(this.b2f2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
@@ -216,6 +266,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".floor2");
 			(this.floor2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.floor2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".floor3") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".floor3");
+			(this.floor3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.floor3.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".floor1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".floor1");
@@ -264,6 +319,9 @@ public class Map {
 		if (floor2 == null) {
 			flag = true;
 		}
+		if (floor3 == null) {
+			flag = true;
+		}
 		if (floor1 == null) {
 			flag = true;
 		}
@@ -280,9 +338,7 @@ public class Map {
 
 	public void start() {
 		this.setState(MapState.STARTED);
-		//this.firstRound();
-		getPlayer().teleport(floor2);
-		miniBoss();
+		firstRound();
 	}
 
 	public void firstRound() {
@@ -317,9 +373,19 @@ public class Map {
 			}
 		}, 2);
 	}
-	
+
 	public void miniBoss() {
-		 Mob.get().Floor2Boss(bossLoc2);
+		setLocked(true);
+		setRound(3);
+		Mob.get().Floor2Boss(bossLoc2);
+	}
+
+	public void spawnGuards() {
+		message("Guards have been deployed.");
+		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 0));
+		Mob.get().spawnGuard(bossLoc2.clone().add(0, 0, 2));
+		Mob.get().spawnGuard(bossLoc2.clone().add(1, 0, 2));
+		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 1));
 	}
 
 	public int getRound() {
@@ -328,6 +394,14 @@ public class Map {
 
 	public void setRound(int i) {
 		round = i;
+	}
+
+	public boolean isFirst() {
+		return first;
+	}
+
+	public void setFirst(boolean b) {
+		first = b;
 	}
 
 	public int getFloor() {
@@ -340,6 +414,12 @@ public class Map {
 
 	public void addPlayer(final Player p) {
 		if (!this.containsPlayer(p) && this.state.canJoin()) {
+			if (p.getInventory().contains(card1)) {
+				p.getInventory().remove(card1);
+			}
+			if (p.getInventory().contains(card2)) {
+				p.getInventory().remove(card2);
+			}
 			Map.data = new Data(p, this);
 			p.teleport(this.spawn);
 			this.message(ChatColor.GREEN + p.getName() + " joined the Mission!");
@@ -351,8 +431,12 @@ public class Map {
 
 	public void removePlayer(final Player p) {
 		if (this.containsPlayer(p)) {
+			p.stopSound(Sound.RECORD_MELLOHI);
 			if (p.getInventory().contains(card1)) {
 				p.getInventory().remove(card1);
+			}
+			if (p.getInventory().contains(card2)) {
+				p.getInventory().remove(card2);
 			}
 			Map.data.restore();
 			Map.data = null;
@@ -400,10 +484,16 @@ public class Map {
 					registry.deregister(NPCs);
 				}
 				round2.clear();
+				for (NPC NPCs : round3) {
+					registry.deregister(NPCs);
+				}
+				round3.clear();
 				for (NPC NPCs : boss.values()) {
 					registry.deregister(NPCs);
 				}
 				boss.clear();
+				first = true;
+				setFloor(1);
 				setRound(1);
 			}
 		}, 1);
@@ -423,7 +513,7 @@ public class Map {
 		this.saveToConfig();
 	}
 
-	public void setBossLoc(int i,  Location l) {
+	public void setBossLoc(int i, Location l) {
 		if (i == 1) {
 			bossLoc = l;
 			saveToConfig();
@@ -435,7 +525,15 @@ public class Map {
 			checkState();
 		}
 	}
-	
+
+	public void setButton3(int i, Location l) {
+		if (i == 1) {
+			b3f1 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+
 	public void setButton1(int i, Location l) {
 		if (i == 1) {
 			b1f1 = l;
@@ -443,7 +541,15 @@ public class Map {
 			checkState();
 		}
 	}
-	
+
+	public Location getButton3(int i) {
+		if (i == 1) {
+			return b3f1;
+		} else {
+			return null;
+		}
+	}
+
 	public Location getButton1(int i) {
 		if (i == 1) {
 			return b1f1;
@@ -522,6 +628,11 @@ public class Map {
 			saveToConfig();
 			checkState();
 		}
+		if (i == 3) {
+			floor3 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 
 	public Location getFloor(int i) {
@@ -530,6 +641,9 @@ public class Map {
 		}
 		if (i == 1) {
 			return floor1;
+		}
+		if (i == 3) {
+			return floor3;
 		} else {
 			return null;
 		}
@@ -552,13 +666,13 @@ public class Map {
 	}
 
 	public boolean containsNPC(NPC npc) {
-		return round1.contains(npc) || round2.contains(npc) || boss.containsValue(npc);
+		return round1.contains(npc) || round2.contains(npc) || round3.contains(npc) || boss.containsValue(npc);
 	}
-	
+
 	public boolean isLocked() {
 		return locked;
 	}
-	
+
 	public void setLocked(boolean b) {
 		locked = b;
 	}
@@ -566,8 +680,12 @@ public class Map {
 	public List<NPC> getRoundNPC(int i) {
 		if (i == 1) {
 			return round1;
-		} else if (i == 2) {
+		}
+		if (i == 2) {
 			return round2;
+		}
+		if (i == 3) {
+			return round3;
 		} else {
 			return null;
 		}
@@ -576,7 +694,7 @@ public class Map {
 	public NPC getBoss(int i) {
 		return boss.get(i);
 	}
-	
+
 	public HashMap<Integer, NPC> getBoss() {
 		return boss;
 	}
@@ -584,6 +702,9 @@ public class Map {
 	public ItemStack getCard(int i) {
 		if (i == 1) {
 			return card1;
+		}
+		if (i == 2) {
+			return card2;
 		} else {
 			return null;
 		}
@@ -596,8 +717,12 @@ public class Map {
 	public List<Location> getButtons(int i) {
 		if (i == 1) {
 			return b1s;
-		} if (i == 2) {
+		}
+		if (i == 2) {
 			return b2s;
+		}
+		if (i == 3) {
+			return b3s;
 		} else {
 			return null;
 		}

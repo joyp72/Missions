@@ -4,6 +4,7 @@ import java.util.*;
 import org.bukkit.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -17,6 +18,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEntityEvent;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -103,6 +105,13 @@ public class RaidListener implements Listener {
 						editors.clear();
 						return;
 					}
+					if (edit.get(m) == 31) {
+						m.setButton3(1, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set button for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
 				}
 			}
 		}
@@ -113,13 +122,25 @@ public class RaidListener implements Listener {
 						if (p.getInventory().contains(map.getCard(1))) {
 							if (map.getFloor() == 1) {
 								p.teleport(map.getFloor(2));
+								if (map.isFirst()) {
+									map.miniBoss();
+									map.setFirst(false);
+								}
 								map.setFloor(2);
-								map.setLocked(true);
 								return;
 							}
 							if (map.getFloor() == 3) {
 								p.teleport(map.getFloor(2));
 								map.setFloor(2);
+								return;
+							}
+						}
+					}
+					if (map.getButtons(3).contains(e.getClickedBlock().getLocation())) {
+						if (p.getInventory().contains(map.getCard(2))) {
+							if (map.getFloor() == 2) {
+								p.teleport(map.getFloor(3));
+								map.setFloor(3);
 								return;
 							}
 						}
@@ -132,6 +153,16 @@ public class RaidListener implements Listener {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onNPCHit(NPCDamageByEntityEvent e) {
+		NPC npc = e.getNPC();
+		if (e.getDamager() instanceof Player || e.getDamager() instanceof Arrow) {
+			if (npc.hasTrait(MiniTrait.class)) {
+				e.setCancelled(true);
 			}
 		}
 	}
@@ -158,6 +189,13 @@ public class RaidListener implements Listener {
 								p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
 							}
 						}
+					}
+				}
+				if (m.getRoundNPC(3).contains(npc)) {
+					e.setDamage(6);
+					if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
+						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
+						p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
 					}
 				}
 			}

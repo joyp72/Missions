@@ -87,6 +87,7 @@ public class MissionTrait extends Trait {
 	public void onSpawn() {
 		if (map.getPlayer() != null) {
 			npc.getNavigator().setTarget(map.getPlayer(), true);
+			npc.getNavigator().getLocalParameters().range(100f);
 		}
 
 	}

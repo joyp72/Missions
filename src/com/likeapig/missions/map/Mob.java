@@ -33,6 +33,7 @@ public class Mob {
 	Evoker ev;
 	private List<NPC> round1;
 	private List<NPC> round2;
+	private List<NPC> round3;
 	private HashMap<Integer, NPC> boss;
 	Location loc;
 	NPCRegistry registry;
@@ -49,8 +50,10 @@ public class Mob {
 	public List<NPC> getRound(int i) {
 		if (i == 1) {
 			return round1;
-		} else if (i == 2) {
+		} if (i == 2) {
 			return round2;
+		} if (i == 3) {
+			return round3;
 		} else {
 			return null;
 		}
@@ -75,6 +78,7 @@ public class Mob {
 		this.registry = CitizensAPI.getNPCRegistry();
 		round1 = new ArrayList<NPC>();
 		round2 = new ArrayList<NPC>();
+		round3 = new ArrayList<NPC>();
 		boss = new HashMap<Integer, NPC>();
 		bossStick = new ItemStack(Material.STICK);
 		{
@@ -103,6 +107,16 @@ public class Mob {
 			Damageable entity = (Damageable) npc.getEntity();
 			entity.setMaxHealth(100);
 			entity.setHealth(100);
+			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
+		}
+	}
+	
+	public void spawnGuard(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
+		npc.addTrait(MissionTrait.class);
+		round3.add(npc);
+		npc.spawn(loc);
+		if (npc.isSpawned()) {
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}

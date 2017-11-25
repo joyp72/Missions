@@ -10,9 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -26,6 +31,8 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
+import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 import net.citizensnpcs.api.util.DataKey;
 
 @TraitName("MiniTrait")
@@ -49,16 +56,34 @@ public class MiniTrait extends Trait {
 
 	Location loc2;
 	Vector vec2;
-	
+
 	private ItemStack diamond = new ItemStack(Material.DIAMOND_CHESTPLATE);
 	private ItemStack gold = new ItemStack(Material.GOLD_CHESTPLATE);
 	private ItemStack iron = new ItemStack(Material.IRON_CHESTPLATE);
+	private ItemStack air = new ItemStack(Material.AIR);
+
+	public final Material[] NON_OPAQUE = { Material.AIR, Material.SAPLING, Material.WATER, Material.STATIONARY_WATER,
+			Material.LAVA, Material.STATIONARY_LAVA, Material.POWERED_RAIL, Material.DETECTOR_RAIL, Material.WEB,
+			Material.LONG_GRASS, Material.DEAD_BUSH, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM,
+			Material.RED_MUSHROOM, Material.TORCH, Material.FIRE, Material.REDSTONE_WIRE, Material.CROPS,
+			Material.LADDER, Material.RAILS, Material.SIGN_POST, Material.LEVER, Material.STONE_PLATE,
+			Material.WOOD_PLATE, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON, Material.STONE_BUTTON,
+			Material.SNOW, Material.SUGAR_CANE_BLOCK, Material.PORTAL, Material.DIODE_BLOCK_OFF,
+			Material.DIODE_BLOCK_ON, Material.PUMPKIN_STEM, Material.MELON_STEM, Material.VINE, Material.WATER_LILY,
+			Material.NETHER_WART_BLOCK, Material.ENDER_PORTAL, Material.COCOA, Material.TRIPWIRE_HOOK,
+			Material.TRIPWIRE, Material.FLOWER_POT, Material.CARROT, Material.POTATO, Material.WOOD_BUTTON,
+			Material.GOLD_PLATE, Material.IRON_PLATE, Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON,
+			Material.DAYLIGHT_DETECTOR, Material.CARPET, Material.DOUBLE_PLANT, Material.STANDING_BANNER,
+			Material.WALL_BANNER, Material.DAYLIGHT_DETECTOR_INVERTED, Material.END_ROD, Material.CHORUS_PLANT,
+			Material.CHORUS_FLOWER, Material.BEETROOT_BLOCK, Material.END_GATEWAY };
 
 	boolean locReached = false;
 	boolean isBlocking = false;
 	boolean checkBlock = false;
 	boolean damaged = false;
 	boolean show = true;
+	boolean sound = true;
+	int armor = 3;
 
 	boolean SomeSetting = false;
 
@@ -93,6 +118,10 @@ public class MiniTrait extends Trait {
 			setCharge(t, npc.getEntity().getLocation());
 			if (p != null) {
 				if (npc.getEntity().getLocation().distance(p.getLocation()) <= 6) {
+					if (sound) {
+						p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.5f);
+						sound = false;
+					}
 					npc.getNavigator().cancelNavigation();
 					npc.faceLocation(p.getLocation().subtract(0, 1, 0));
 				} else {
@@ -102,13 +131,6 @@ public class MiniTrait extends Trait {
 		}
 	}
 
-	public void chargeShot() {
-		if (!charged) {
-
-		}
-
-	}
-
 	public void setCharge(int t, Location l) {
 		if (!charged) {
 			if (t <= 60) {
@@ -116,23 +138,23 @@ public class MiniTrait extends Trait {
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ffb90f");
 			}
-			if (t > 60 && t < 120) {
+			if (t > 60 && t < 100) {
 				Location loc = l.clone().add(0.0, 1.6, 0);
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ff7400");
 			}
-			if (t >= 120 && t < 160) {
+			if (t >= 100 && t < 140) {
 				Location loc = l.clone().add(0.0, 1.6, 0);
 				loc.add(loc.getDirection().multiply(1).normalize());
 				displayColoredParticle(loc, "ff2700");
 			}
-			if (t == 160) {
+			if (t == 140) {
 				loc = npc.getEntity().getLocation().add(0, 1.6, 0);
 				vec = loc.getDirection();
 				loc2 = p.getLocation().add(0, 1, 0);
 				vec2 = getDirection(loc2, npc.getEntity().getLocation().add(0, 1, 0));
 			}
-			if (t > 160 && t < 320) {
+			if (t > 140 && t < 200) {
 				fireShot();
 				if (loc.distance(p.getLocation()) <= 2) {
 					locReached = true;
@@ -147,14 +169,30 @@ public class MiniTrait extends Trait {
 							checkBlock = true;
 						}
 					}
-					if (checkBlock && isBlocking) {
+					if (checkBlock && !damaged && isBlocking) {
 						fireShotBack();
 						if (loc2.distance(npc.getEntity().getLocation()) <= 2) {
-							((Damageable) npc.getEntity()).damage(4);
+							ParticleEffect.EXPLOSION_LARGE.display(npc.getEntity().getLocation().add(0, 1, 0), 0.0f,
+									0.0f, 0.0f, 0.0f, 1);
+							p.getWorld().playSound(npc.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f,
+									0.5f);
+							if (armor <= 0) {
+								((Damageable) npc.getEntity()).damage(7);
+								armor = 3;
+							} else {
+								armor--;
+							}
+							if (!npc.getEntity().isDead()) {
+								setArmor(armor);
+							}
+							damaged = true;
 							show = false;
 						}
 					}
 					if (checkBlock && !damaged && !isBlocking) {
+						ParticleEffect.EXPLOSION_LARGE.display(p.getEyeLocation().add(0, 1, 0), 0.0f, 0.0f, 0.0f, 0.0f,
+								1);
+						p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
 						p.damage(12);
 						show = false;
 						damaged = true;
@@ -162,27 +200,53 @@ public class MiniTrait extends Trait {
 				}
 			}
 		}
-		if (t >= 320) {
+		if (t >= 200) {
 			locReached = false;
 			checkBlock = false;
+			damaged = false;
 			show = true;
 			this.t = 0;
 		}
 	}
 
+	public void setArmor(int i) {
+		if (npc != null) {
+			if (i == 3 && npc.getTrait(Equipment.class).get(EquipmentSlot.CHESTPLATE) != diamond) {
+				p.getWorld().playSound(npc.getEntity().getLocation(), Sound.BLOCK_ANVIL_USE, 1.0f, 1f);
+				map.spawnGuards();
+				npc.getTrait(Equipment.class).set(EquipmentSlot.CHESTPLATE, diamond);
+			}
+			if (i == 2 && npc.getTrait(Equipment.class).get(EquipmentSlot.CHESTPLATE) != gold) {
+				npc.getTrait(Equipment.class).set(EquipmentSlot.CHESTPLATE, gold);
+			}
+			if (i == 1 && npc.getTrait(Equipment.class).get(EquipmentSlot.CHESTPLATE) != iron) {
+				npc.getTrait(Equipment.class).set(EquipmentSlot.CHESTPLATE, iron);
+			}
+			if (i <= 0 && npc.getTrait(Equipment.class).get(EquipmentSlot.CHESTPLATE) != air) {
+				npc.getTrait(Equipment.class).set(EquipmentSlot.CHESTPLATE, air);
+			}
+		}
+	}
+
 	public void fireShot() {
-		loc.add(vec.normalize().multiply(0.8));
-		if (show) {
-			displayColoredParticle(loc, "E41B17", 0.0f, 0.0f, 0.0f);
-			ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+		Block block = loc.getBlock();
+		if (!isSolid(block)) {
+			loc.add(vec.normalize().multiply(0.8));
+			if (show) {
+				displayColoredParticle(loc, "E41B17", 0.0f, 0.0f, 0.0f);
+				ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+			}
 		}
 	}
 
 	public void fireShotBack() {
-		loc2.add(vec2.normalize().multiply(0.8));
-		if (show) {
-			displayColoredParticle(loc2, "E41B17", 0.0f, 0.0f, 0.0f);
-			ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+		Block block = loc2.getBlock();
+		if (!isSolid(block)) {
+			loc2.add(vec2.normalize().multiply(0.8));
+			if (show) {
+				displayColoredParticle(loc2, "E41B17", 0.0f, 0.0f, 0.0f);
+				ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+			}
 		}
 	}
 
@@ -209,7 +273,8 @@ public class MiniTrait extends Trait {
 	@Override
 	public void onSpawn() {
 		npc.getNavigator().setTarget(map.getPlayer(), true);
-
+		npc.getNavigator().getLocalParameters().range(100f);
+		setArmor(armor);
 	}
 
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.
@@ -261,6 +326,10 @@ public class MiniTrait extends Trait {
 		}
 
 		return entities;
+	}
+
+	public boolean isSolid(Block block) {
+		return !Arrays.asList(NON_OPAQUE).contains(block.getType());
 	}
 
 	public static void displayColoredParticle(Location loc, ParticleEffect type, String hexVal, float xOffset,

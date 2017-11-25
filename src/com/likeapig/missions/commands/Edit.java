@@ -54,6 +54,12 @@ public class Edit extends Commands {
 			edit.put(m, 11);
 			MessageManager.get().message(sender, "Editing button 1, floor 2 for: " + m.getName());
 			return;
+		}
+		if (args[1].equalsIgnoreCase("31")) {
+			editors.add(sender);
+			edit.put(m, 31);
+			MessageManager.get().message(sender, "Editing button 3, floor 2 for: " + m.getName());
+			return;
 		} else {
 			MessageManager.get().message(sender, "Bad Input", MessageType.BAD);
 			return;
