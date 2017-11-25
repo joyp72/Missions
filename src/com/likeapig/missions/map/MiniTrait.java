@@ -177,7 +177,7 @@ public class MiniTrait extends Trait {
 							p.getWorld().playSound(npc.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f,
 									0.5f);
 							if (armor <= 0) {
-								((Damageable) npc.getEntity()).damage(7);
+								((Damageable) npc.getEntity()).damage(11);
 								armor = 3;
 							} else {
 								armor--;

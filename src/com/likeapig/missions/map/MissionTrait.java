@@ -1,5 +1,6 @@
 package com.likeapig.missions.map;
 
+import org.bukkit.entity.Damageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -89,7 +90,6 @@ public class MissionTrait extends Trait {
 			npc.getNavigator().setTarget(map.getPlayer(), true);
 			npc.getNavigator().getLocalParameters().range(100f);
 		}
-
 	}
 
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.

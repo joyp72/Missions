@@ -105,8 +105,8 @@ public class Mob {
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
 			Damageable entity = (Damageable) npc.getEntity();
-			entity.setMaxHealth(100);
-			entity.setHealth(100);
+			entity.setMaxHealth(30);
+			entity.setHealth(30);
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}
@@ -117,6 +117,9 @@ public class Mob {
 		round3.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(30);
+			entity.setHealth(30);
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}
@@ -126,6 +129,11 @@ public class Mob {
 		npc.addTrait(MissionTrait.class);
 		round1.add(npc);
 		npc.spawn(loc);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(10);
+			entity.setHealth(10);
+		}
 	}
 
 	public void spawnRound2(Location loc) {
@@ -133,6 +141,11 @@ public class Mob {
 		npc.addTrait(MissionTrait.class);
 		round2.add(npc);
 		npc.spawn(loc);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(10);
+			entity.setHealth(10);
+		}
 	}
 
 	public ItemStack getBossStick() {
