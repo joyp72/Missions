@@ -37,6 +37,42 @@ public class Edit extends Commands {
 			MessageManager.get().message(sender, "You have quit editing.");
 			return;
 		}
+		if (args[1].equalsIgnoreCase("rs")) {
+			editors.add(sender);
+			edit.put(m, 45);
+			MessageManager.get().message(sender, "Editing rs for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("1")) {
+			editors.add(sender);
+			edit.put(m, 1);
+			MessageManager.get().message(sender, "Editing chest 1 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("2")) {
+			editors.add(sender);
+			edit.put(m, 2);
+			MessageManager.get().message(sender, "Editing chest 2 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("3")) {
+			editors.add(sender);
+			edit.put(m, 3);
+			MessageManager.get().message(sender, "Editing chest 3 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("4")) {
+			editors.add(sender);
+			edit.put(m, 4);
+			MessageManager.get().message(sender, "Editing chest 4 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("5")) {
+			editors.add(sender);
+			edit.put(m, 5);
+			MessageManager.get().message(sender, "Editing chest 5 for: " + m.getName());
+			return;
+		}
 		if (args[1].equalsIgnoreCase("21")) {
 			editors.add(sender);
 			edit.put(m, 21);
@@ -59,6 +95,12 @@ public class Edit extends Commands {
 			editors.add(sender);
 			edit.put(m, 31);
 			MessageManager.get().message(sender, "Editing button 3, floor 2 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("41")) {
+			editors.add(sender);
+			edit.put(m, 41);
+			MessageManager.get().message(sender, "Editing button 4, floor 3 for: " + m.getName());
 			return;
 		} else {
 			MessageManager.get().message(sender, "Bad Input", MessageType.BAD);

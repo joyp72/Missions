@@ -36,5 +36,10 @@ public class SetBoss extends Commands {
 			MessageManager.get().message(sender, "Boss Loc 2 set for: " + m.getName(), MessageManager.MessageType.GOOD);
 			return;
 		}
+		if (args[1].equalsIgnoreCase("3")) {
+			m.setBossLoc(3, sender.getLocation());
+			MessageManager.get().message(sender, "Boss Loc 3 set for: " + m.getName(), MessageManager.MessageType.GOOD);
+			return;
+		}
 	}
 }

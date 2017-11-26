@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.utils.ParticleEffect;
@@ -182,8 +183,10 @@ public class MiniTrait extends Trait {
 							} else {
 								armor--;
 							}
-							if (!npc.getEntity().isDead()) {
-								setArmor(armor);
+							if (npc.getEntity() != null) {
+								if (!npc.getEntity().isDead()) {
+									setArmor(armor);
+								}
 							}
 							damaged = true;
 							show = false;
@@ -275,7 +278,7 @@ public class MiniTrait extends Trait {
 		npc.getNavigator().setTarget(map.getPlayer(), true);
 		npc.getNavigator().getLocalParameters().range(100f);
 		setArmor(armor);
-	}
+	} 
 
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.
 	@Override

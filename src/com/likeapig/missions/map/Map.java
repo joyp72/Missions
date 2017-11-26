@@ -3,23 +3,30 @@ package com.likeapig.missions.map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Dye;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
 import com.likeapig.missions.commands.MessageManager;
 import com.likeapig.missions.commands.MessageManager.MessageType;
 import com.likeapig.missions.utils.LocationUtils;
+import com.likeapig.missions.utils.Titles;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCDeathEvent;
@@ -34,14 +41,17 @@ public class Map {
 	private List<NPC> round1;
 	private List<NPC> round2;
 	private List<NPC> round3;
+	private List<NPC> round4;
 	private HashMap<Integer, NPC> boss;
 	private List<Location> doors;
 	private List<Location> b1s;
 	private List<Location> b2s;
 	private List<Location> b3s;
+	private List<Location> b4s;
 	private Location spawn;
 	private Location bossLoc;
 	private Location bossLoc2;
+	private Location bossLoc3;
 	private Location door1;
 	private Location door2;
 	private Location door3;
@@ -49,15 +59,27 @@ public class Map {
 	private MapState state;
 	private ItemStack card1;
 	private ItemStack card2;
+	private ItemStack card3;
 	private Location b3f1;
 	private Location b1f1;
 	private Location b2f1;
 	private Location b2f2;
+	private Location b4f1;
 	private Location floor3;
 	private Location floor2;
 	private Location floor1;
+	private Location chest1;
+	private Location chest2;
+	private Location chest3;
+	private Location chest4;
+	private Location chest5;
+	private Location rs;
+	private List<Location> chests;
+	private List<Location> tempchests;
 	private boolean locked;
 	private boolean first;
+	private boolean second;
+	private int i;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -65,25 +87,31 @@ public class Map {
 		this.round1 = Mob.get().getRound(1);
 		round2 = Mob.get().getRound(2);
 		round3 = Mob.get().getRound(3);
+		round4 = Mob.get().getRound(4);
 		boss = Mob.get().getBoss();
 		this.doors = new ArrayList<Location>();
 		b2s = new ArrayList<Location>();
 		b3s = new ArrayList<Location>();
+		b4s = new ArrayList<Location>();
 		b1s = new ArrayList<Location>();
+		chests = new ArrayList<Location>();
+		tempchests = new ArrayList<Location>();
 		this.state = MapState.STOPPED;
 		this.name = s;
 		first = true;
+		second = true;
 		locked = false;
 		floor = 1;
 		round = 1;
+		i = 1;
 		card1 = new ItemStack(Material.PAPER);
 		{
 			ItemMeta meta = card1.getItemMeta();
-			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Keycard");
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Floor 2 Keycard");
 			ArrayList<String> lore = new ArrayList<>();
 			lore.add(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Mission Item)");
 			lore.add("");
-			lore.add(ChatColor.GRAY + "Used to access 2nd Floor.");
+			lore.add(ChatColor.GRAY + "Used to access 2nd floor.");
 			meta.setLore(lore);
 			meta.addItemFlags(ItemFlag.values());
 			card1.setItemMeta(meta);
@@ -92,17 +120,30 @@ public class Map {
 		card2 = new ItemStack(Material.PAPER);
 		{
 			ItemMeta meta = card2.getItemMeta();
-			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Keycard");
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Floor 3 Keycard");
 			ArrayList<String> lore = new ArrayList<>();
 			lore.add(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Mission Item)");
 			lore.add("");
-			lore.add(ChatColor.GRAY + "Used to access 3nd Floor.");
+			lore.add(ChatColor.GRAY + "Used to access 3rd floor.");
 			meta.setLore(lore);
 			meta.addItemFlags(ItemFlag.values());
 			card2.setItemMeta(meta);
 			card2.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		}
-		this.loadFromConfig();
+		card3 = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = card3.getItemMeta();
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Storage Keycard");
+			ArrayList<String> lore = new ArrayList<>();
+			lore.add(ChatColor.GRAY + "" + ChatColor.ITALIC + "(Mission Item)");
+			lore.add("");
+			lore.add(ChatColor.GRAY + "Used to access storage room on 1st floor.");
+			meta.setLore(lore);
+			meta.addItemFlags(ItemFlag.values());
+			card3.setItemMeta(meta);
+			card3.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
+		}
+		loadFromiConfig();
 		if (this.door1 != null && this.door2 != null && this.door3 != null && this.door4 != null) {
 			this.doors.add(this.door1);
 			this.doors.add(this.door2);
@@ -121,8 +162,71 @@ public class Map {
 		if (b3f1 != null) {
 			b3s.add(b3f1);
 		}
-		this.saveToConfig();
+		if (b4f1 != null) {
+			b4s.add(b4f1);
+		}
+		if (chest1 != null && chest2 != null && chest3 != null && chest4 != null && chest5 != null) {
+			chests.add(chest1);
+			chests.add(chest2);
+			chests.add(chest3);
+			chests.add(chest4);
+			chests.add(chest5);
+		}
+		saveToConfig();
 		this.checkState();
+	}
+
+	public void loadChests() {
+		Random r = new Random();
+		Location loc = chests.get(r.nextInt(chests.size()));
+		if (!tempchests.contains(loc) && i == 1) {
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.setItem(10, new ItemStack(Material.DIAMOND));
+			tempchests.add(loc);
+			chests.remove(loc);
+			i++;
+		}
+		if (!tempchests.contains(loc) && i == 2) {
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.setItem(9, new ItemStack(Material.IRON_INGOT));
+			ci.setItem(23, new ItemStack(Material.DIAMOND));
+			tempchests.add(loc);
+			chests.remove(loc);
+			i++;
+		}
+		if (!tempchests.contains(loc) && i == 3) {
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.setItem(16, new ItemStack(Material.GOLD_INGOT));
+			ci.setItem(20, new ItemStack(Material.GOLD_INGOT));
+			tempchests.add(loc);
+			chests.remove(loc);
+			i++;
+		}
+		if (!tempchests.contains(loc) && i == 4) {
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.setItem(3, new ItemStack(Material.REDSTONE));
+			tempchests.add(loc);
+			chests.remove(loc);
+			i++;
+		}
+		if (!tempchests.contains(loc) && i == 5) {
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.setItem(5, new ItemStack(Material.DIAMOND));
+			ci.setItem(12, new ItemStack(Material.DIAMOND));
+			tempchests.add(loc);
+			chests.remove(loc);
+			i++;
+		}
 	}
 
 	public void handleNPCDeath(NPCDeathEvent e) {
@@ -139,19 +243,37 @@ public class Map {
 			round3.remove(npc);
 			registry.deregister(npc);
 		}
+		if (round4.contains(npc)) {
+			round4.remove(npc);
+			registry.deregister(npc);
+		}
 		if (boss.containsValue(npc)) {
-			if (npc.hasTrait(MiniTrait.class)) {
-				boss.clear();
-				registry.deregister(npc);
-				getPlayer().getInventory().addItem(card2);
-				message("You picked up a new Keycard!");
-				setLocked(false);
-			} else {
-				boss.clear();
-				registry.deregister(npc);
-				getPlayer().getInventory().addItem(card1);
-				message("You picked up a Keycard!");
-				setLocked(false);
+			if (getBoss().get(2) != null) {
+				if (getBoss().get(2).equals(npc)) {
+					boss.clear();
+					registry.deregister(npc);
+					getPlayer().getInventory().addItem(card2);
+					message("You picked up a new Keycard!");
+					setLocked(false);
+				}
+			}
+			if (getBoss().get(1) != null) {
+				if (getBoss().get(1).equals(npc)) {
+					boss.clear();
+					registry.deregister(npc);
+					getPlayer().getInventory().addItem(card1);
+					message("You picked up a Keycard!");
+					setLocked(false);
+				}
+			}
+			if (getBoss().get(3) != null) {
+				if (getBoss().get(3).equals(npc)) {
+					boss.clear();
+					registry.deregister(npc);
+					getPlayer().getInventory().addItem(card3);
+					message("You picked up a Storage Keycard!");
+					setLocked(false);
+				}
 			}
 		}
 		if (getRound() == 1 && round1.size() == 0) {
@@ -169,6 +291,9 @@ public class Map {
 		}
 		if (this.bossLoc2 != null) {
 			Settings.get().set("maps." + this.getName() + ".bossLoc2", LocationUtils.locationToString(this.bossLoc2));
+		}
+		if (this.bossLoc3 != null) {
+			Settings.get().set("maps." + this.getName() + ".bossLoc3", LocationUtils.locationToString(this.bossLoc3));
 		}
 		if (this.door1 != null) {
 			Settings.get().set("maps." + this.getName() + ".door1", LocationUtils.locationToString(this.door1));
@@ -191,8 +316,29 @@ public class Map {
 		if (b1f1 != null) {
 			Settings.get().set("maps." + this.getName() + ".b1f1", LocationUtils.locationToString(b1f1));
 		}
+		if (chest1 != null) {
+			Settings.get().set("maps." + this.getName() + ".chest1", LocationUtils.locationToString(chest1));
+		}
+		if (chest2 != null) {
+			Settings.get().set("maps." + this.getName() + ".chest2", LocationUtils.locationToString(chest2));
+		}
+		if (chest3 != null) {
+			Settings.get().set("maps." + this.getName() + ".chest3", LocationUtils.locationToString(chest3));
+		}
+		if (chest4 != null) {
+			Settings.get().set("maps." + this.getName() + ".chest4", LocationUtils.locationToString(chest4));
+		}
+		if (chest5 != null) {
+			Settings.get().set("maps." + this.getName() + ".chest5", LocationUtils.locationToString(chest5));
+		}
+		if (rs != null) {
+			Settings.get().set("maps." + this.getName() + ".rs", LocationUtils.locationToString(rs));
+		}
 		if (b3f1 != null) {
 			Settings.get().set("maps." + this.getName() + ".b3f1", LocationUtils.locationToString(b3f1));
+		}
+		if (b4f1 != null) {
+			Settings.get().set("maps." + this.getName() + ".b4f1", LocationUtils.locationToString(b4f1));
 		}
 		if (floor2 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor2", LocationUtils.locationToString(floor2));
@@ -205,7 +351,7 @@ public class Map {
 		}
 	}
 
-	public void loadFromConfig() {
+	public void loadFromiConfig() {
 		final Settings s = Settings.get();
 		if (s.get("maps." + this.getName() + ".spawn") != null) {
 			final String s2 = s.get("maps." + this.getName() + ".spawn");
@@ -221,6 +367,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".bossLoc2");
 			(this.bossLoc2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.bossLoc2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".bossLoc3") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".bossLoc3");
+			(this.bossLoc3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.bossLoc3.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".door1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".door1");
@@ -252,10 +403,45 @@ public class Map {
 			(this.b1f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.b1f1.setYaw(LocationUtils.stringToYaw(s3));
 		}
+		if (s.get("maps." + this.getName() + ".chest1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".chest1");
+			(this.chest1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.chest1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".chest2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".chest2");
+			(this.chest2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.chest2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".chest3") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".chest3");
+			(this.chest3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.chest3.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".chest4") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".chest4");
+			(this.chest4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.chest4.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".chest5") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".chest5");
+			(this.chest5 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.chest5.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".rs") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".rs");
+			(this.rs = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.rs.setYaw(LocationUtils.stringToYaw(s3));
+		}
 		if (s.get("maps." + this.getName() + ".b3f1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".b3f1");
 			(this.b3f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.b3f1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".b4f1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".b4f1");
+			(this.b4f1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.b4f1.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".b2f2") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".b2f2");
@@ -298,10 +484,31 @@ public class Map {
 		if (b2f2 == null) {
 			flag = true;
 		}
+		if (chest1 == null) {
+			flag = true;
+		}
+		if (chest2 == null) {
+			flag = true;
+		}
+		if (chest3 == null) {
+			flag = true;
+		}
+		if (chest4 == null) {
+			flag = true;
+		}
+		if (chest5 == null) {
+			flag = true;
+		}
+		if (rs == null) {
+			flag = true;
+		}
 		if (this.bossLoc == null) {
 			flag = true;
 		}
 		if (this.bossLoc2 == null) {
+			flag = true;
+		}
+		if (this.bossLoc3 == null) {
 			flag = true;
 		}
 		if (this.door1 == null) {
@@ -337,6 +544,11 @@ public class Map {
 	}
 
 	public void start() {
+		loadChests();
+		loadChests();
+		loadChests();
+		loadChests();
+		loadChests();
 		this.setState(MapState.STARTED);
 		firstRound();
 	}
@@ -380,12 +592,35 @@ public class Map {
 		Mob.get().Floor2Boss(bossLoc2);
 	}
 
+	public void thirdFloor() {
+		setLocked(true);
+		setRound(4);
+		Titles.get().addTitle(getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 160);
+		Titles.get().addSubTitle(getPlayer(),
+				ChatColor.WHITE + "Good luck trying to get to me without a working elevator! HAHAHA! >:}", 140);
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				Mob.get().spawnLit(bossLoc3);
+				spawnRobots();
+			}
+		}, 160L);
+	}
+
 	public void spawnGuards() {
 		message("Guards have been deployed.");
 		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 0));
 		Mob.get().spawnGuard(bossLoc2.clone().add(0, 0, 2));
 		Mob.get().spawnGuard(bossLoc2.clone().add(1, 0, 2));
 		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 1));
+	}
+
+	public void spawnRobots() {
+		message("Robots have been deployed.");
+		Mob.get().spawnLitGuards(bossLoc3.clone().add(2, 0, 0));
+		Mob.get().spawnLitGuards(bossLoc3.clone().add(0, 0, 2));
+		Mob.get().spawnLitGuards(bossLoc3.clone().add(1, 0, 2));
+		Mob.get().spawnLitGuards(bossLoc3.clone().add(2, 0, 1));
 	}
 
 	public int getRound() {
@@ -402,6 +637,14 @@ public class Map {
 
 	public void setFirst(boolean b) {
 		first = b;
+	}
+
+	public boolean isSecond() {
+		return second;
+	}
+
+	public void setSecond(boolean b) {
+		second = b;
 	}
 
 	public int getFloor() {
@@ -437,6 +680,9 @@ public class Map {
 			}
 			if (p.getInventory().contains(card2)) {
 				p.getInventory().remove(card2);
+			}
+			if (p.getInventory().contains(card3)) {
+				p.getInventory().remove(card3);
 			}
 			Map.data.restore();
 			Map.data = null;
@@ -488,11 +734,29 @@ public class Map {
 					registry.deregister(NPCs);
 				}
 				round3.clear();
+				for (NPC NPCs : round4) {
+					registry.deregister(NPCs);
+				}
+				round4.clear();
 				for (NPC NPCs : boss.values()) {
 					registry.deregister(NPCs);
 				}
 				boss.clear();
+				for (Location loc : tempchests) {
+					Block b = loc.getBlock();
+					Chest c = (Chest) b.getState();
+					Inventory ci = c.getInventory();
+					ci.clear();
+				}
+				tempchests.clear();
+				if (isRS()) {
+					Block b = rs.getBlock();
+					b.setType(Material.AIR);
+					b.getState().update();
+				}
+				i = 1;
 				first = true;
+				second = true;
 				setFloor(1);
 				setRound(1);
 			}
@@ -509,8 +773,8 @@ public class Map {
 
 	public void setSpawn(final Location l) {
 		this.spawn = l;
-		this.checkState();
 		this.saveToConfig();
+		checkState();
 	}
 
 	public void setBossLoc(int i, Location l) {
@@ -524,11 +788,90 @@ public class Map {
 			saveToConfig();
 			checkState();
 		}
+		if (i == 3) {
+			bossLoc3 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+
+	public List<Location> getChests() {
+		return chests;
+	}
+
+	public Location getChest(int i) {
+		if (i == 1) {
+			return chest1;
+		}
+		if (i == 2) {
+			return chest2;
+		}
+		if (i == 3) {
+			return chest3;
+		}
+		if (i == 4) {
+			return chest4;
+		}
+		if (i == 5) {
+			return chest5;
+		} else {
+			return null;
+		}
+	}
+
+	public void setChest(int i, Location l) {
+		if (i == 1) {
+			chest1 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 2) {
+			chest2 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 3) {
+			chest3 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 4) {
+			chest4 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 5) {
+			chest5 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+
+	public Location getRS() {
+		return rs;
+	}
+
+	public void setRS(Location l) {
+		rs = l;
+		saveToConfig();
+		checkState();
+	}
+
+	public boolean isRS() {
+		return rs.getBlock().getType() == Material.REDSTONE_WIRE;
 	}
 
 	public void setButton3(int i, Location l) {
 		if (i == 1) {
 			b3f1 = l;
+			saveToConfig();
+			checkState();
+		}
+	}
+
+	public void setButton4(int i, Location l) {
+		if (i == 1) {
+			b4f1 = l;
 			saveToConfig();
 			checkState();
 		}
@@ -545,6 +888,14 @@ public class Map {
 	public Location getButton3(int i) {
 		if (i == 1) {
 			return b3f1;
+		} else {
+			return null;
+		}
+	}
+
+	public Location getButton4(int i) {
+		if (i == 1) {
+			return b4f1;
 		} else {
 			return null;
 		}
@@ -574,7 +925,7 @@ public class Map {
 	public void setDoorLoc1(final Location l) {
 		this.door1 = l;
 		this.checkState();
-		this.saveToConfig();
+		saveToConfig();
 	}
 
 	public void setDoorLoc2(final Location l) {
@@ -601,6 +952,9 @@ public class Map {
 		}
 		if (i == 2) {
 			return bossLoc2;
+		}
+		if (i == 3) {
+			return bossLoc3;
 		} else {
 			return null;
 		}
@@ -666,7 +1020,8 @@ public class Map {
 	}
 
 	public boolean containsNPC(NPC npc) {
-		return round1.contains(npc) || round2.contains(npc) || round3.contains(npc) || boss.containsValue(npc);
+		return round1.contains(npc) || round2.contains(npc) || round3.contains(npc) || round4.contains(npc)
+				|| boss.containsValue(npc);
 	}
 
 	public boolean isLocked() {
@@ -686,6 +1041,9 @@ public class Map {
 		}
 		if (i == 3) {
 			return round3;
+		}
+		if (i == 4) {
+			return round4;
 		} else {
 			return null;
 		}
@@ -705,6 +1063,9 @@ public class Map {
 		}
 		if (i == 2) {
 			return card2;
+		}
+		if (i == 3) {
+			return card3;
 		} else {
 			return null;
 		}
@@ -723,6 +1084,9 @@ public class Map {
 		}
 		if (i == 3) {
 			return b3s;
+		}
+		if (i == 4) {
+			return b4s;
 		} else {
 			return null;
 		}

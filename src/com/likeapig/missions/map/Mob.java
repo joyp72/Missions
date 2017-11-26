@@ -34,10 +34,12 @@ public class Mob {
 	private List<NPC> round1;
 	private List<NPC> round2;
 	private List<NPC> round3;
+	private List<NPC> round4;
 	private HashMap<Integer, NPC> boss;
 	Location loc;
 	NPCRegistry registry;
 	ItemStack bossStick;
+	ItemStack litStick;
 
 	static {
 		Mob.instance = new Mob();
@@ -50,10 +52,15 @@ public class Mob {
 	public List<NPC> getRound(int i) {
 		if (i == 1) {
 			return round1;
-		} if (i == 2) {
+		}
+		if (i == 2) {
 			return round2;
-		} if (i == 3) {
+		}
+		if (i == 3) {
 			return round3;
+		}
+		if (i == 4) {
+			return round4;
 		} else {
 			return null;
 		}
@@ -79,6 +86,7 @@ public class Mob {
 		round1 = new ArrayList<NPC>();
 		round2 = new ArrayList<NPC>();
 		round3 = new ArrayList<NPC>();
+		round4 = new ArrayList<NPC>();
 		boss = new HashMap<Integer, NPC>();
 		bossStick = new ItemStack(Material.STICK);
 		{
@@ -86,6 +94,13 @@ public class Mob {
 			meta.addItemFlags(ItemFlag.values());
 			bossStick.setItemMeta(meta);
 			bossStick.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
+		}
+		litStick = new ItemStack(Material.BLAZE_ROD);
+		{
+			ItemMeta meta = litStick.getItemMeta();
+			meta.addItemFlags(ItemFlag.values());
+			litStick.setItemMeta(meta);
+			litStick.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		}
 	}
 
@@ -110,16 +125,38 @@ public class Mob {
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}
-	
+
+	public void spawnLit(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "§4Red Guard");
+		npc.addTrait(MissionTrait.class);
+		boss.put(3, npc);
+		npc.spawn(loc);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(30);
+			entity.setHealth(30);
+			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(litStick);
+		}
+	}
+
+	public void spawnLitGuards(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "Robot");
+		npc.addTrait(MissionTrait.class);
+		round4.add(npc);
+		npc.spawn(loc);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(16);
+			entity.setHealth(16);
+		}
+	}
+
 	public void spawnGuard(Location loc) {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
 		npc.addTrait(MissionTrait.class);
 		round3.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
-			Damageable entity = (Damageable) npc.getEntity();
-			entity.setMaxHealth(30);
-			entity.setHealth(30);
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}
@@ -150,6 +187,10 @@ public class Mob {
 
 	public ItemStack getBossStick() {
 		return bossStick;
+	}
+
+	public ItemStack getLitStick() {
+		return litStick;
 	}
 
 	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {

@@ -1,36 +1,35 @@
 package com.likeapig.missions.map;
 
-import java.util.*;
-import org.bukkit.*;
+import java.util.HashMap;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-
-import com.likeapig.missions.*;
-import com.likeapig.missions.commands.MessageManager;
-import com.likeapig.missions.models.LawnMower;
-
-import org.bukkit.plugin.*;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
-import net.citizensnpcs.api.event.NPCDamageEntityEvent;
-import net.citizensnpcs.api.event.NPCDeathEvent;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.md_5.bungee.api.*;
-import org.bukkit.event.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import com.likeapig.missions.Main;
+import com.likeapig.missions.commands.MessageManager;
+import com.likeapig.missions.models.LawnMower;
+
+import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
+import net.citizensnpcs.api.event.NPCDamageEntityEvent;
+import net.citizensnpcs.api.event.NPCDeathEvent;
+import net.citizensnpcs.api.npc.NPC;
 
 public class RaidListener implements Listener {
 	private static RaidListener instance;
@@ -48,6 +47,22 @@ public class RaidListener implements Listener {
 
 	public void setup() {
 		Bukkit.getPluginManager().registerEvents((Listener) this, (Plugin) Main.get());
+	}
+
+	@EventHandler
+	public void playerInteract(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
+		Map m = MapManager.get().getMap(p);
+		if (m != null) {
+			if (m.isLocked() || !p.getInventory().contains(m.getCard(3))) {
+				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					Block block = e.getClickedBlock();
+					if (block.getType() == Material.SPRUCE_DOOR) {
+						e.setCancelled(true);
+					}
+				}
+			}
+		}
 	}
 
 	@EventHandler
@@ -112,6 +127,65 @@ public class RaidListener implements Listener {
 						editors.clear();
 						return;
 					}
+					if (edit.get(m) == 41) {
+						m.setButton4(1, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set button for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+				}
+			}
+			if (e.getClickedBlock().getType() == Material.CHEST && e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (edit.containsKey(MapManager.get().getMap("test"))) {
+					Map m = MapManager.get().getMap("test");
+					if (edit.get(m) == 1) {
+						m.setChest(1, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set chest1 for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 2) {
+						m.setChest(2, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set chest2 for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 3) {
+						m.setChest(3, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set chest3 for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 4) {
+						m.setChest(4, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set chest4 for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 5) {
+						m.setChest(5, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set chest5 for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+				}
+			}
+			if (e.getClickedBlock().getType() == Material.REDSTONE_WIRE && e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (edit.containsKey(MapManager.get().getMap("test"))) {
+					Map m = MapManager.get().getMap("test");
+					if (edit.get(m) == 45) {
+						m.setRS(e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set rs for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
 				}
 			}
 		}
@@ -140,7 +214,19 @@ public class RaidListener implements Listener {
 						if (p.getInventory().contains(map.getCard(2))) {
 							if (map.getFloor() == 2) {
 								p.teleport(map.getFloor(3));
+								if (map.isSecond()) {
+									map.thirdFloor();
+									map.setSecond(false);
+								}
 								map.setFloor(3);
+								return;
+							}
+						}
+					}
+					if (map.getButtons(4).contains(e.getClickedBlock().getLocation())) {
+						if (map.isRS()) {
+							if (map.getFloor() == 3) {
+								p.sendMessage("thats it so far :)");
 								return;
 							}
 						}
@@ -180,6 +266,9 @@ public class RaidListener implements Listener {
 				if (Mob.get().getRound(2).contains(npc)) {
 					e.setDamage(5);
 				}
+				if (Mob.get().getRound(4).contains(npc)) {
+					e.setDamage(4);
+				}
 				if (m.getBoss().containsValue(npc)) {
 					if (m.getBoss().get(1) != null) {
 						if (m.getBoss().get(1).equals(npc)) {
@@ -188,6 +277,14 @@ public class RaidListener implements Listener {
 								p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
 								p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
 							}
+						}
+					}
+					if (m.getBoss().get(3) != null) {
+						if (m.getBoss().get(3).equals(npc)) {
+							if (p.getFireTicks() <= 0) {
+								p.setFireTicks(4 * 20);
+							}
+							e.setDamage(4);
 						}
 					}
 				}
