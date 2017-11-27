@@ -76,6 +76,13 @@ public class Map {
 	private Location rs;
 	private List<Location> chests;
 	private List<Location> tempchests;
+	private List<String> fifteen;
+	private List<String> ten;
+	private List<String> five;
+	private List<String> twentyfive;
+	private List<String> fifty;
+	private List<String> seventyfive;
+	private List<String> eighty;
 	private boolean locked;
 	private boolean first;
 	private boolean second;
@@ -96,6 +103,22 @@ public class Map {
 		b1s = new ArrayList<Location>();
 		chests = new ArrayList<Location>();
 		tempchests = new ArrayList<Location>();
+		fifteen = new ArrayList<String>();
+		ten = new ArrayList<String>();
+		five = new ArrayList<String>();
+		twentyfive = new ArrayList<String>();
+		fifty = new ArrayList<String>();
+		seventyfive = new ArrayList<String>();
+		eighty = new ArrayList<String>();
+		fifteen.add(Material.IRON_INGOT.toString());
+		fifteen.add(Material.IRON_HELMET.toString());
+		fifteen.add(Material.IRON_CHESTPLATE.toString());
+		ten.add(Material.AIR.toString());
+		five.add(Material.AIR.toString());
+		twentyfive.add(Material.AIR.toString());
+		fifty.add(Material.AIR.toString());
+		seventyfive.add(Material.AIR.toString());
+		eighty.add(Material.AIR.toString());
 		this.state = MapState.STOPPED;
 		this.name = s;
 		first = true;
@@ -143,6 +166,8 @@ public class Map {
 			card3.setItemMeta(meta);
 			card3.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		}
+		saveLoot();
+		loadLoot();
 		loadFromiConfig();
 		if (this.door1 != null && this.door2 != null && this.door3 != null && this.door4 != null) {
 			this.doors.add(this.door1);
@@ -178,12 +203,42 @@ public class Map {
 
 	public void loadChests() {
 		Random r = new Random();
+		Random r2 = new Random();
+		Random r3 = new Random();
+		Random r4 = new Random();
+		Random r5 = new Random();
+		int ch = r2.nextInt(100) + 1;
+		int slot = r3.nextInt(26);
+		String s = Material.AIR.toString();
+		String s2 = Material.AIR.toString();
+		if (ch <= 5) {
+			s = five.get(r4.nextInt(five.size()));
+			s2 = five.get(r5.nextInt(five.size()));
+		} else if (ch <= 10) {
+			s = ten.get(r4.nextInt(ten.size()));
+			s2 = ten.get(r5.nextInt(ten.size()));
+		} else if (ch <= 15) {
+			s = fifteen.get(r4.nextInt(fifteen.size()));
+			s2 = fifteen.get(r5.nextInt(fifteen.size()));
+		} else if (ch <= 25) {
+			s = twentyfive.get(r4.nextInt(twentyfive.size()));
+			s2 = twentyfive.get(r5.nextInt(twentyfive.size()));
+		} else if (ch <= 50) {
+			s = fifty.get(r4.nextInt(fifty.size()));
+			s2 = fifty.get(r5.nextInt(fifty.size()));
+		} else if (ch <= 75) {
+			s = seventyfive.get(r4.nextInt(seventyfive.size()));
+			s2 = seventyfive.get(r5.nextInt(seventyfive.size()));
+		} else if (ch <= 80) {
+			s = eighty.get(r4.nextInt(eighty.size()));
+			s2 = eighty.get(r5.nextInt(eighty.size()));
+		}
 		Location loc = chests.get(r.nextInt(chests.size()));
 		if (!tempchests.contains(loc) && i == 1) {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(10, new ItemStack(Material.DIAMOND));
+			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -192,8 +247,8 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(9, new ItemStack(Material.IRON_INGOT));
-			ci.setItem(23, new ItemStack(Material.DIAMOND));
+			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
+			ci.setItem(23, new ItemStack(Material.getMaterial(s2.toUpperCase())));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -202,8 +257,8 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(16, new ItemStack(Material.GOLD_INGOT));
-			ci.setItem(20, new ItemStack(Material.GOLD_INGOT));
+			ci.setItem(16, new ItemStack(Material.getMaterial(s.toUpperCase())));
+			ci.setItem(slot, new ItemStack(Material.getMaterial(s2.toUpperCase())));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -213,6 +268,7 @@ public class Map {
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
 			ci.setItem(3, new ItemStack(Material.REDSTONE));
+			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -221,8 +277,8 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(5, new ItemStack(Material.DIAMOND));
-			ci.setItem(12, new ItemStack(Material.DIAMOND));
+			ci.setItem(5, new ItemStack(Material.getMaterial(s.toUpperCase())));
+			ci.setItem(slot, new ItemStack(Material.getMaterial(s2.toUpperCase())));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -280,6 +336,41 @@ public class Map {
 			message("A guard has been deployed.");
 			secondRound();
 		}
+	}
+
+	public void loadLoot() {
+		final Settings s = Settings.get();
+		if (s.getLoot("loot." + getName() + ".15") != null) {
+			fifteen = s.getLoot("loot." + getName() + ".15");
+		}
+		if (s.getLoot("loot." + getName() + ".10") != null) {
+			ten = s.getLoot("loot." + getName() + ".10");
+		}
+		if (s.getLoot("loot." + getName() + ".5") != null) {
+			five = s.getLoot("loot." + getName() + ".5");
+		}
+		if (s.getLoot("loot." + getName() + ".25") != null) {
+			twentyfive = s.getLoot("loot." + getName() + ".25");
+		}
+		if (s.getLoot("loot." + getName() + ".50") != null) {
+			fifty = s.getLoot("loot." + getName() + ".50");
+		}
+		if (s.getLoot("loot." + getName() + ".75") != null) {
+			seventyfive = s.getLoot("loot." + getName() + ".75");
+		}
+		if (s.getLoot("loot." + getName() + ".80") != null) {
+			eighty = s.getLoot("loot." + getName() + ".80");
+		}
+	}
+
+	public void saveLoot() {
+		Settings.get().setLoot("loot." + getName() + ".15", fifteen);
+		Settings.get().setLoot("loot." + getName() + ".10", ten);
+		Settings.get().setLoot("loot." + getName() + ".5", five);
+		Settings.get().setLoot("loot." + getName() + ".25", twentyfive);
+		Settings.get().setLoot("loot." + getName() + ".50", fifty);
+		Settings.get().setLoot("loot." + getName() + ".75", seventyfive);
+		Settings.get().setLoot("loot." + getName() + ".80", eighty);
 	}
 
 	public void saveToConfig() {

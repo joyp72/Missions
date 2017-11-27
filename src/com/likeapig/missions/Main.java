@@ -1,5 +1,6 @@
 package com.likeapig.missions;
 
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcmonkey.sentinel.SentinelTrait;
@@ -29,7 +30,8 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		Main.instance = this;
 		this.getLogger().info("Raid Enabled!");
-		ProtocolLibrary.getProtocolManager().addPacketListener(new Movement(this, ListenerPriority.NORMAL, new PacketType[]{PacketType.Play.Client.STEER_VEHICLE}));
+		ProtocolLibrary.getProtocolManager().addPacketListener(
+				new Movement(this, ListenerPriority.NORMAL, new PacketType[] { PacketType.Play.Client.STEER_VEHICLE }));
 		CommandsManager.get().setup();
 		RaidListener.get().setup();
 		Settings.get().setup((Plugin) this);
