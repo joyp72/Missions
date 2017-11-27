@@ -46,20 +46,6 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 public class Map {
 	private String name;
 	static Data data;
-	public final Material[] NON_OPAQUE = { Material.SKULL, Material.AIR, Material.SAPLING, Material.WATER,
-			Material.STATIONARY_WATER, Material.LAVA, Material.STATIONARY_LAVA, Material.POWERED_RAIL,
-			Material.DETECTOR_RAIL, Material.WEB, Material.LONG_GRASS, Material.DEAD_BUSH, Material.YELLOW_FLOWER,
-			Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.TORCH, Material.FIRE,
-			Material.REDSTONE_WIRE, Material.CROPS, Material.LADDER, Material.RAILS, Material.SIGN_POST, Material.LEVER,
-			Material.STONE_PLATE, Material.WOOD_PLATE, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
-			Material.STONE_BUTTON, Material.SNOW, Material.SUGAR_CANE_BLOCK, Material.PORTAL, Material.DIODE_BLOCK_OFF,
-			Material.DIODE_BLOCK_ON, Material.PUMPKIN_STEM, Material.MELON_STEM, Material.VINE, Material.WATER_LILY,
-			Material.NETHER_WART_BLOCK, Material.ENDER_PORTAL, Material.COCOA, Material.TRIPWIRE_HOOK,
-			Material.TRIPWIRE, Material.FLOWER_POT, Material.CARROT, Material.POTATO, Material.WOOD_BUTTON,
-			Material.GOLD_PLATE, Material.IRON_PLATE, Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON,
-			Material.DAYLIGHT_DETECTOR, Material.CARPET, Material.DOUBLE_PLANT, Material.STANDING_BANNER,
-			Material.WALL_BANNER, Material.DAYLIGHT_DETECTOR_INVERTED, Material.END_ROD, Material.CHORUS_PLANT,
-			Material.CHORUS_FLOWER, Material.BEETROOT_BLOCK, Material.END_GATEWAY };
 	private int round;
 	private int floor;
 	private List<NPC> round1;
@@ -115,20 +101,11 @@ public class Map {
 	private boolean locked;
 	private boolean first;
 	private boolean second;
+	private boolean third;
 	private int i;
 	private int id = 0;
 	private int t = 0;
 	NPCRegistry registry;
-	Location l;
-	Vector v;
-	Location l2;
-	Vector v2;
-	boolean reached = false;
-	boolean checked = false;
-	boolean isBlocking = false;
-	boolean damaged = false;
-	boolean show = true;
-	boolean killed = false;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
@@ -165,6 +142,7 @@ public class Map {
 		this.name = s;
 		first = true;
 		second = true;
+		third = false;
 		locked = false;
 		floor = 1;
 		round = 1;
@@ -733,9 +711,7 @@ public class Map {
 		loadChests();
 		skinHeads();
 		this.setState(MapState.STARTED);
-		// firstRound();
-		getPlayer().teleport(floor3);
-		lazerRound();
+		firstRound();
 	}
 
 	public void firstRound() {
@@ -782,7 +758,7 @@ public class Map {
 		setRound(4);
 		Titles.get().addTitle(getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 160);
 		Titles.get().addSubTitle(getPlayer(),
-				ChatColor.WHITE + "Good luck trying to get to me without a working elevator! HAHAHA! >:}", 140);
+				ChatColor.WHITE + "Good luck trying to get to me without a working teleporter! HAHAHA! >:}", 140);
 		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
 			@Override
 			public void run() {
@@ -813,97 +789,12 @@ public class Map {
 			@Override
 			public void run() {
 				t++;
-				lazers(t, head1, getPlayer().getLocation(), getPlayer());
+				Lazer.get().lazer1(t, head1, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer2(t, head2, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer3(t, head3, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer4(t, head4, getPlayer().getLocation(), getPlayer(), getMap());
 			}
 		}, 0L, 0L);
-	}
-
-	public void lazers(int t, Location location, Location player, Player p) {
-		if (!killed) {
-			if (t <= 60) {
-				Location loc = location.clone();
-				loc.add(loc.getDirection().multiply(1).normalize());
-				displayColoredParticle(loc, "ff7400");
-			}
-			if (t > 60 && t < 100) {
-				Location loc = location.clone();
-				loc.add(loc.getDirection().multiply(1).normalize());
-				displayColoredParticle(loc, "ff2700");
-			}
-			if (t == 100) {
-				l = location.clone();
-				v = getDirection(l, player.add(0, 1, 0));
-				l2 = p.getLocation().clone().add(0, 1, 0);
-				v2 = getDirection(l2, location);
-			}
-			if (t > 100 && t < 160) {
-				fireShot(l, v);
-				if (l.distance(getPlayer().getLocation()) <= 2) {
-					reached = true;
-				}
-				if (reached) {
-					if (!checked) {
-						if (p.isBlocking()) {
-							isBlocking = true;
-							checked = true;
-						} else {
-							isBlocking = false;
-							checked = true;
-						}
-					}
-					if (checked && !damaged && isBlocking) {
-						fireShotBack(l2, v2);
-						if (l2.distance(location) <= 2) {
-							ParticleEffect.EXPLOSION_LARGE.display(location, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-							p.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
-							location.getBlock().setType(Material.AIR);
-							location.getBlock().getState().update();
-							killed = true;
-							damaged = true;
-							show = false;
-						}
-					}
-					if (checked && !damaged && !isBlocking) {
-						ParticleEffect.EXPLOSION_LARGE.display(player, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-						p.getWorld().playSound(player, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
-						p.damage(12);
-						show = false;
-						damaged = true;
-					}
-				}
-			}
-			if (t >= 160) {
-				reached = false;
-				isBlocking = false;
-				checked = false;
-				damaged = false;
-				show = true;
-				this.t = 0;
-			}
-		}
-	}
-
-	public void fireShot(Location loc, Vector vec) {
-		Block b = loc.getBlock();
-		if (!isSolid(b)) {
-			loc.add(vec.normalize().multiply(0.8));
-			if (show) {
-				displayColoredParticle(loc, "E41B17");
-				ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 25);
-			}
-		}
-
-	}
-
-	public void fireShotBack(Location loc2, Vector vec2) {
-		Block block = loc2.getBlock();
-		if (!isSolid(block)) {
-			loc2.add(vec2.normalize().multiply(0.8));
-			if (show) {
-				displayColoredParticle(loc2, "E41B17", 0.0f, 0.0f, 0.0f);
-				ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 25);
-			}
-		}
 	}
 
 	public void skinHeads() {
@@ -946,6 +837,14 @@ public class Map {
 
 	public void setSecond(boolean b) {
 		second = b;
+	}
+
+	public boolean isThird() {
+		return third;
+	}
+
+	public void setThird(boolean b) {
+		third = b;
 	}
 
 	public int getFloor() {
@@ -1058,18 +957,29 @@ public class Map {
 					b.getState().update();
 				}
 				i = 1;
-				reached = false;
-				isBlocking = false;
-				checked = false;
-				damaged = false;
-				show = true;
-				killed = false;
+				t = 0;
+				Lazer.get().reset();
 				first = true;
 				second = true;
+				third = false;
 				setFloor(1);
 				setRound(1);
 			}
 		}, 1);
+	}
+
+	public void breakRS() {
+		if (isRS()) {
+			Block b = rs.getBlock();
+			b.setType(Material.AIR);
+			b.getState().update();
+			ItemStack item = new ItemStack(Material.REDSTONE);
+			getPlayer().getWorld().dropItem(rs.clone().add(0, 1, 0), item);
+		}
+	}
+
+	public void setT(int i) {
+		t = i;
 	}
 
 	public boolean isStarted() {
@@ -1207,7 +1117,7 @@ public class Map {
 	}
 
 	public boolean isRS() {
-		return rs.getBlock().getType() == Material.REDSTONE_WIRE;
+		return rs.getBlock().getType() == Material.REDSTONE_WIRE || rs.getBlock().getType() == Material.REDSTONE;
 	}
 
 	public void setButton3(int i, Location l) {
@@ -1460,146 +1370,6 @@ public class Map {
 			this.removePlayer(getPlayer());
 		}
 		this.setState(MapState.STOPPED);
-	}
-
-	public static Vector getDirection(Location location, Location destination) {
-		double x1, y1, z1;
-		double x0, y0, z0;
-
-		x1 = destination.getX();
-		y1 = destination.getY();
-		z1 = destination.getZ();
-
-		x0 = location.getX();
-		y0 = location.getY();
-		z0 = location.getZ();
-
-		return new Vector(x1 - x0, y1 - y0, z1 - z0);
-	}
-
-	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {
-		List<Entity> entities = new ArrayList<Entity>();
-		World world = location.getWorld();
-
-		int smallX = (int) (location.getX() - radius) >> 4;
-		int bigX = (int) (location.getX() + radius) >> 4;
-		int smallZ = (int) (location.getZ() - radius) >> 4;
-		int bigZ = (int) (location.getZ() + radius) >> 4;
-
-		for (int x = smallX; x <= bigX; x++) {
-			for (int z = smallZ; z <= bigZ; z++) {
-				if (world.isChunkLoaded(x, z)) {
-					entities.addAll(Arrays.asList(world.getChunkAt(x, z).getEntities()));
-				}
-			}
-		}
-
-		Iterator<Entity> entityIterator = entities.iterator();
-		while (entityIterator.hasNext()) {
-			Entity e = entityIterator.next();
-			if (e.getWorld().equals(location.getWorld())
-					&& e.getLocation().distanceSquared(location) > radius * radius) {
-				entityIterator.remove();
-			} else if (e instanceof Player && ((Player) e).getGameMode().equals(GameMode.SPECTATOR)) {
-				entityIterator.remove();
-			}
-		}
-
-		return entities;
-	}
-
-	public boolean isSolid(Block block) {
-		return !Arrays.asList(NON_OPAQUE).contains(block.getType());
-	}
-
-	public static void displayColoredParticle(Location loc, ParticleEffect type, String hexVal, float xOffset,
-			float yOffset, float zOffset) {
-		int R = 0;
-		int G = 0;
-		int B = 0;
-
-		if (hexVal.length() <= 6) {
-			R = Integer.valueOf(hexVal.substring(0, 2), 16);
-			G = Integer.valueOf(hexVal.substring(2, 4), 16);
-			B = Integer.valueOf(hexVal.substring(4, 6), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
-			R = Integer.valueOf(hexVal.substring(1, 3), 16);
-			G = Integer.valueOf(hexVal.substring(3, 5), 16);
-			B = Integer.valueOf(hexVal.substring(5, 7), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		}
-
-		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
-		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
-		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
-
-		if (type == ParticleEffect.RED_DUST || type == ParticleEffect.REDSTONE) {
-			ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 255.0);
-		} else if (type == ParticleEffect.SPELL_MOB || type == ParticleEffect.MOB_SPELL) {
-			ParticleEffect.SPELL_MOB.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc, 255.0);
-		} else if (type == ParticleEffect.SPELL_MOB_AMBIENT || type == ParticleEffect.MOB_SPELL_AMBIENT) {
-			ParticleEffect.SPELL_MOB_AMBIENT.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc,
-					255.0);
-		} else {
-			ParticleEffect.RED_DUST.display(0, 0, 0, 0.004F, 0, loc, 255.0D);
-		}
-	}
-
-	public static void displayColoredParticle(Location loc, String hexVal) {
-		int R = 0;
-		int G = 0;
-		int B = 0;
-
-		if (hexVal.length() <= 6) {
-			R = Integer.valueOf(hexVal.substring(0, 2), 16);
-			G = Integer.valueOf(hexVal.substring(2, 4), 16);
-			B = Integer.valueOf(hexVal.substring(4, 6), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
-			R = Integer.valueOf(hexVal.substring(1, 3), 16);
-			G = Integer.valueOf(hexVal.substring(3, 5), 16);
-			B = Integer.valueOf(hexVal.substring(5, 7), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		}
-		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
-	}
-
-	public static void displayColoredParticle(Location loc, String hexVal, float xOffset, float yOffset,
-			float zOffset) {
-		int R = 0;
-		int G = 0;
-		int B = 0;
-
-		if (hexVal.length() <= 6) {
-			R = Integer.valueOf(hexVal.substring(0, 2), 16);
-			G = Integer.valueOf(hexVal.substring(2, 4), 16);
-			B = Integer.valueOf(hexVal.substring(4, 6), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
-			R = Integer.valueOf(hexVal.substring(1, 3), 16);
-			G = Integer.valueOf(hexVal.substring(3, 5), 16);
-			B = Integer.valueOf(hexVal.substring(5, 7), 16);
-			if (R <= 0) {
-				R = 1;
-			}
-		}
-
-		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
-		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
-		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
-
-		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
 	}
 
 	public enum MapState {

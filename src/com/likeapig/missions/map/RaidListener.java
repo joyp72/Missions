@@ -24,6 +24,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.commands.MessageManager;
+import com.likeapig.missions.commands.MessageManager.MessageType;
 import com.likeapig.missions.models.LawnMower;
 
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
@@ -239,6 +240,9 @@ public class RaidListener implements Listener {
 							}
 							if (map.getFloor() == 3) {
 								p.teleport(map.getFloor(2));
+								if (!map.isThird()) {
+									map.setThird(true);
+								}
 								map.setFloor(2);
 								return;
 							}
@@ -252,6 +256,9 @@ public class RaidListener implements Listener {
 									map.thirdFloor();
 									map.setSecond(false);
 								}
+								if (map.isThird()) {
+									map.lazerRound();
+								}
 								map.setFloor(3);
 								return;
 							}
@@ -260,9 +267,19 @@ public class RaidListener implements Listener {
 					if (map.getButtons(4).contains(e.getClickedBlock().getLocation())) {
 						if (map.isRS()) {
 							if (map.getFloor() == 3) {
-								p.sendMessage("thats it so far :)");
-								return;
+								if (map.isThird()) {
+									if (Lazer.get().isDead()) {
+										p.sendMessage("thats it so far :)");
+									} else {
+										MessageManager.get().message(p, "You need to secure the redstone!", MessageType.BAD);
+										map.breakRS();
+									}
+								} else {
+									MessageManager.get().message(p, "The storage room is on the first floor!", MessageType.BAD);
+								}
 							}
+						} else {
+							MessageManager.get().message(p, "You need to fix the teleporter first!", MessageType.BAD);
 						}
 					}
 					if (map.getButtons(1).contains(e.getClickedBlock().getLocation())) {
