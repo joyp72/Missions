@@ -67,6 +67,30 @@ public class Edit extends Commands {
 			MessageManager.get().message(sender, "Editing chest 4 for: " + m.getName());
 			return;
 		}
+		if (args[1].equalsIgnoreCase("h1")) {
+			editors.add(sender);
+			edit.put(m, 61);
+			MessageManager.get().message(sender, "Editing head 1 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("h2")) {
+			editors.add(sender);
+			edit.put(m, 62);
+			MessageManager.get().message(sender, "Editing head 2 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("h3")) {
+			editors.add(sender);
+			edit.put(m, 63);
+			MessageManager.get().message(sender, "Editing head 3 for: " + m.getName());
+			return;
+		}
+		if (args[1].equalsIgnoreCase("h4")) {
+			editors.add(sender);
+			edit.put(m, 64);
+			MessageManager.get().message(sender, "Editing head 4 for: " + m.getName());
+			return;
+		}
 		if (args[1].equalsIgnoreCase("5")) {
 			editors.add(sender);
 			edit.put(m, 5);

@@ -188,6 +188,40 @@ public class RaidListener implements Listener {
 					}
 				}
 			}
+			if (e.getClickedBlock().getType() == Material.SKULL || e.getClickedBlock().getType() == Material.SKULL_ITEM
+					&& e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (edit.containsKey(MapManager.get().getMap("test"))) {
+					Map m = MapManager.get().getMap("test");
+					if (edit.get(m) == 61) {
+						m.setHead(1, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set head for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 62) {
+						m.setHead(2, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set head for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 63) {
+						m.setHead(3, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set head for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 64) {
+						m.setHead(4, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set head for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+				}
+			}
 		}
 		if (map != null) {
 			if (!map.isLocked()) {

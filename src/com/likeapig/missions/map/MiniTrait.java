@@ -205,6 +205,7 @@ public class MiniTrait extends Trait {
 		}
 		if (t >= 200) {
 			locReached = false;
+			isBlocking = false;
 			checkBlock = false;
 			damaged = false;
 			show = true;

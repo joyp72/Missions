@@ -60,6 +60,20 @@ public class Skip extends Commands {
 			m.setLocked(false);
 			return;
 		}
+		if (m.getRound() == 4) {
+			for (NPC npcs : m.getRoundNPC(4)) {
+				registry.deregister(npcs);
+			}
+			m.getRoundNPC(4).clear();
+			for (NPC boss : m.getBoss().values()) {
+				registry.deregister(boss);
+			}
+			m.getBoss().clear();
+			m.getPlayer().getInventory().addItem(m.getCard(3));
+			m.message("You picked up a Storage Keycard!");
+			m.setLocked(false);
+			return;
+		}
 
 	}
 }

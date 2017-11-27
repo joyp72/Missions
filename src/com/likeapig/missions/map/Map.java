@@ -1,31 +1,41 @@
 package com.likeapig.missions.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.block.Skull;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Dye;
+import org.bukkit.util.Vector;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
 import com.likeapig.missions.commands.MessageManager;
 import com.likeapig.missions.commands.MessageManager.MessageType;
 import com.likeapig.missions.utils.LocationUtils;
+import com.likeapig.missions.utils.ParticleEffect;
 import com.likeapig.missions.utils.Titles;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -36,6 +46,20 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 public class Map {
 	private String name;
 	static Data data;
+	public final Material[] NON_OPAQUE = { Material.SKULL, Material.AIR, Material.SAPLING, Material.WATER,
+			Material.STATIONARY_WATER, Material.LAVA, Material.STATIONARY_LAVA, Material.POWERED_RAIL,
+			Material.DETECTOR_RAIL, Material.WEB, Material.LONG_GRASS, Material.DEAD_BUSH, Material.YELLOW_FLOWER,
+			Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.TORCH, Material.FIRE,
+			Material.REDSTONE_WIRE, Material.CROPS, Material.LADDER, Material.RAILS, Material.SIGN_POST, Material.LEVER,
+			Material.STONE_PLATE, Material.WOOD_PLATE, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON,
+			Material.STONE_BUTTON, Material.SNOW, Material.SUGAR_CANE_BLOCK, Material.PORTAL, Material.DIODE_BLOCK_OFF,
+			Material.DIODE_BLOCK_ON, Material.PUMPKIN_STEM, Material.MELON_STEM, Material.VINE, Material.WATER_LILY,
+			Material.NETHER_WART_BLOCK, Material.ENDER_PORTAL, Material.COCOA, Material.TRIPWIRE_HOOK,
+			Material.TRIPWIRE, Material.FLOWER_POT, Material.CARROT, Material.POTATO, Material.WOOD_BUTTON,
+			Material.GOLD_PLATE, Material.IRON_PLATE, Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON,
+			Material.DAYLIGHT_DETECTOR, Material.CARPET, Material.DOUBLE_PLANT, Material.STANDING_BANNER,
+			Material.WALL_BANNER, Material.DAYLIGHT_DETECTOR_INVERTED, Material.END_ROD, Material.CHORUS_PLANT,
+			Material.CHORUS_FLOWER, Material.BEETROOT_BLOCK, Material.END_GATEWAY };
 	private int round;
 	private int floor;
 	private List<NPC> round1;
@@ -73,6 +97,11 @@ public class Map {
 	private Location chest3;
 	private Location chest4;
 	private Location chest5;
+	private Location head1;
+	private Location head2;
+	private Location head3;
+	private Location head4;
+	private List<Location> heads;
 	private Location rs;
 	private List<Location> chests;
 	private List<Location> tempchests;
@@ -87,7 +116,19 @@ public class Map {
 	private boolean first;
 	private boolean second;
 	private int i;
+	private int id = 0;
+	private int t = 0;
 	NPCRegistry registry;
+	Location l;
+	Vector v;
+	Location l2;
+	Vector v2;
+	boolean reached = false;
+	boolean checked = false;
+	boolean isBlocking = false;
+	boolean damaged = false;
+	boolean show = true;
+	boolean killed = false;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
@@ -110,6 +151,7 @@ public class Map {
 		fifty = new ArrayList<String>();
 		seventyfive = new ArrayList<String>();
 		eighty = new ArrayList<String>();
+		heads = new ArrayList<Location>();
 		fifteen.add(Material.IRON_INGOT.toString());
 		fifteen.add(Material.IRON_HELMET.toString());
 		fifteen.add(Material.IRON_CHESTPLATE.toString());
@@ -166,7 +208,6 @@ public class Map {
 			card3.setItemMeta(meta);
 			card3.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		}
-		saveLoot();
 		loadLoot();
 		loadFromiConfig();
 		if (this.door1 != null && this.door2 != null && this.door3 != null && this.door4 != null) {
@@ -196,6 +237,12 @@ public class Map {
 			chests.add(chest3);
 			chests.add(chest4);
 			chests.add(chest5);
+		}
+		if (head1 != null && head2 != null && head3 != null && head4 != null) {
+			heads.add(head1);
+			heads.add(head2);
+			heads.add(head3);
+			heads.add(head4);
 		}
 		saveToConfig();
 		this.checkState();
@@ -410,6 +457,18 @@ public class Map {
 		if (chest1 != null) {
 			Settings.get().set("maps." + this.getName() + ".chest1", LocationUtils.locationToString(chest1));
 		}
+		if (head1 != null) {
+			Settings.get().set("maps." + this.getName() + ".head1", LocationUtils.locationToString(head1));
+		}
+		if (head2 != null) {
+			Settings.get().set("maps." + this.getName() + ".head2", LocationUtils.locationToString(head2));
+		}
+		if (head3 != null) {
+			Settings.get().set("maps." + this.getName() + ".head3", LocationUtils.locationToString(head3));
+		}
+		if (head4 != null) {
+			Settings.get().set("maps." + this.getName() + ".head4", LocationUtils.locationToString(head4));
+		}
 		if (chest2 != null) {
 			Settings.get().set("maps." + this.getName() + ".chest2", LocationUtils.locationToString(chest2));
 		}
@@ -499,6 +558,26 @@ public class Map {
 			(this.chest1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.chest1.setYaw(LocationUtils.stringToYaw(s3));
 		}
+		if (s.get("maps." + this.getName() + ".head1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".head1");
+			(this.head1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.head1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".head2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".head2");
+			(this.head2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.head2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".head3") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".head3");
+			(this.head3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.head3.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".head4") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".head4");
+			(this.head4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.head4.setYaw(LocationUtils.stringToYaw(s3));
+		}
 		if (s.get("maps." + this.getName() + ".chest2") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".chest2");
 			(this.chest2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
@@ -578,6 +657,18 @@ public class Map {
 		if (chest1 == null) {
 			flag = true;
 		}
+		if (head1 == null) {
+			flag = true;
+		}
+		if (head2 == null) {
+			flag = true;
+		}
+		if (head3 == null) {
+			flag = true;
+		}
+		if (head4 == null) {
+			flag = true;
+		}
 		if (chest2 == null) {
 			flag = true;
 		}
@@ -640,8 +731,11 @@ public class Map {
 		loadChests();
 		loadChests();
 		loadChests();
+		skinHeads();
 		this.setState(MapState.STARTED);
-		firstRound();
+		// firstRound();
+		getPlayer().teleport(floor3);
+		lazerRound();
 	}
 
 	public void firstRound() {
@@ -714,6 +808,122 @@ public class Map {
 		Mob.get().spawnLitGuards(bossLoc3.clone().add(2, 0, 1));
 	}
 
+	public void lazerRound() {
+		id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				t++;
+				lazers(t, head1, getPlayer().getLocation(), getPlayer());
+			}
+		}, 0L, 0L);
+	}
+
+	public void lazers(int t, Location location, Location player, Player p) {
+		if (!killed) {
+			if (t <= 60) {
+				Location loc = location.clone();
+				loc.add(loc.getDirection().multiply(1).normalize());
+				displayColoredParticle(loc, "ff7400");
+			}
+			if (t > 60 && t < 100) {
+				Location loc = location.clone();
+				loc.add(loc.getDirection().multiply(1).normalize());
+				displayColoredParticle(loc, "ff2700");
+			}
+			if (t == 100) {
+				l = location.clone();
+				v = getDirection(l, player.add(0, 1, 0));
+				l2 = p.getLocation().clone().add(0, 1, 0);
+				v2 = getDirection(l2, location);
+			}
+			if (t > 100 && t < 160) {
+				fireShot(l, v);
+				if (l.distance(getPlayer().getLocation()) <= 2) {
+					reached = true;
+				}
+				if (reached) {
+					if (!checked) {
+						if (p.isBlocking()) {
+							isBlocking = true;
+							checked = true;
+						} else {
+							isBlocking = false;
+							checked = true;
+						}
+					}
+					if (checked && !damaged && isBlocking) {
+						fireShotBack(l2, v2);
+						if (l2.distance(location) <= 2) {
+							ParticleEffect.EXPLOSION_LARGE.display(location, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+							p.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+							location.getBlock().setType(Material.AIR);
+							location.getBlock().getState().update();
+							killed = true;
+							damaged = true;
+							show = false;
+						}
+					}
+					if (checked && !damaged && !isBlocking) {
+						ParticleEffect.EXPLOSION_LARGE.display(player, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+						p.getWorld().playSound(player, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+						p.damage(12);
+						show = false;
+						damaged = true;
+					}
+				}
+			}
+			if (t >= 160) {
+				reached = false;
+				isBlocking = false;
+				checked = false;
+				damaged = false;
+				show = true;
+				this.t = 0;
+			}
+		}
+	}
+
+	public void fireShot(Location loc, Vector vec) {
+		Block b = loc.getBlock();
+		if (!isSolid(b)) {
+			loc.add(vec.normalize().multiply(0.8));
+			if (show) {
+				displayColoredParticle(loc, "E41B17");
+				ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+			}
+		}
+
+	}
+
+	public void fireShotBack(Location loc2, Vector vec2) {
+		Block block = loc2.getBlock();
+		if (!isSolid(block)) {
+			loc2.add(vec2.normalize().multiply(0.8));
+			if (show) {
+				displayColoredParticle(loc2, "E41B17", 0.0f, 0.0f, 0.0f);
+				ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+			}
+		}
+	}
+
+	public void skinHeads() {
+		if (heads.size() != 0) {
+			for (Location loc : heads) {
+				Block b = loc.getBlock();
+				if (b.getType() != Material.SKULL) {
+					b.setType(Material.SKULL);
+				}
+				BlockState state = b.getState();
+				if (state instanceof Skull) {
+					Skull skull = (Skull) state;
+					skull.setSkullType(SkullType.PLAYER);
+					skull.setOwner("z_kris_z");
+					skull.update();
+				}
+			}
+		}
+	}
+
 	public int getRound() {
 		return round;
 	}
@@ -765,6 +975,7 @@ public class Map {
 
 	public void removePlayer(final Player p) {
 		if (this.containsPlayer(p)) {
+			Bukkit.getServer().getScheduler().cancelTask(id);
 			p.stopSound(Sound.RECORD_MELLOHI);
 			if (p.getInventory().contains(card1)) {
 				p.getInventory().remove(card1);
@@ -834,6 +1045,7 @@ public class Map {
 				}
 				boss.clear();
 				for (Location loc : tempchests) {
+					chests.add(loc);
 					Block b = loc.getBlock();
 					Chest c = (Chest) b.getState();
 					Inventory ci = c.getInventory();
@@ -846,6 +1058,12 @@ public class Map {
 					b.getState().update();
 				}
 				i = 1;
+				reached = false;
+				isBlocking = false;
+				checked = false;
+				damaged = false;
+				show = true;
+				killed = false;
 				first = true;
 				second = true;
 				setFloor(1);
@@ -888,6 +1106,46 @@ public class Map {
 
 	public List<Location> getChests() {
 		return chests;
+	}
+
+	public Location getHead(int i) {
+		if (i == 1) {
+			return head1;
+		}
+		if (i == 2) {
+			return head2;
+		}
+		if (i == 3) {
+			return head3;
+		}
+		if (i == 4) {
+			return head4;
+		} else {
+			return null;
+		}
+	}
+
+	public void setHead(int i, Location l) {
+		if (i == 1) {
+			head1 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 2) {
+			head2 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 3) {
+			head3 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 4) {
+			head4 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 
 	public Location getChest(int i) {
@@ -1202,6 +1460,146 @@ public class Map {
 			this.removePlayer(getPlayer());
 		}
 		this.setState(MapState.STOPPED);
+	}
+
+	public static Vector getDirection(Location location, Location destination) {
+		double x1, y1, z1;
+		double x0, y0, z0;
+
+		x1 = destination.getX();
+		y1 = destination.getY();
+		z1 = destination.getZ();
+
+		x0 = location.getX();
+		y0 = location.getY();
+		z0 = location.getZ();
+
+		return new Vector(x1 - x0, y1 - y0, z1 - z0);
+	}
+
+	public List<Entity> getEntitiesAroundPoint(Location location, double radius) {
+		List<Entity> entities = new ArrayList<Entity>();
+		World world = location.getWorld();
+
+		int smallX = (int) (location.getX() - radius) >> 4;
+		int bigX = (int) (location.getX() + radius) >> 4;
+		int smallZ = (int) (location.getZ() - radius) >> 4;
+		int bigZ = (int) (location.getZ() + radius) >> 4;
+
+		for (int x = smallX; x <= bigX; x++) {
+			for (int z = smallZ; z <= bigZ; z++) {
+				if (world.isChunkLoaded(x, z)) {
+					entities.addAll(Arrays.asList(world.getChunkAt(x, z).getEntities()));
+				}
+			}
+		}
+
+		Iterator<Entity> entityIterator = entities.iterator();
+		while (entityIterator.hasNext()) {
+			Entity e = entityIterator.next();
+			if (e.getWorld().equals(location.getWorld())
+					&& e.getLocation().distanceSquared(location) > radius * radius) {
+				entityIterator.remove();
+			} else if (e instanceof Player && ((Player) e).getGameMode().equals(GameMode.SPECTATOR)) {
+				entityIterator.remove();
+			}
+		}
+
+		return entities;
+	}
+
+	public boolean isSolid(Block block) {
+		return !Arrays.asList(NON_OPAQUE).contains(block.getType());
+	}
+
+	public static void displayColoredParticle(Location loc, ParticleEffect type, String hexVal, float xOffset,
+			float yOffset, float zOffset) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+
+		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
+		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
+		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
+
+		if (type == ParticleEffect.RED_DUST || type == ParticleEffect.REDSTONE) {
+			ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 255.0);
+		} else if (type == ParticleEffect.SPELL_MOB || type == ParticleEffect.MOB_SPELL) {
+			ParticleEffect.SPELL_MOB.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc, 255.0);
+		} else if (type == ParticleEffect.SPELL_MOB_AMBIENT || type == ParticleEffect.MOB_SPELL_AMBIENT) {
+			ParticleEffect.SPELL_MOB_AMBIENT.display((float) 255 - R, (float) 255 - G, (float) 255 - B, 1, 0, loc,
+					255.0);
+		} else {
+			ParticleEffect.RED_DUST.display(0, 0, 0, 0.004F, 0, loc, 255.0D);
+		}
+	}
+
+	public static void displayColoredParticle(Location loc, String hexVal) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
+	}
+
+	public static void displayColoredParticle(Location loc, String hexVal, float xOffset, float yOffset,
+			float zOffset) {
+		int R = 0;
+		int G = 0;
+		int B = 0;
+
+		if (hexVal.length() <= 6) {
+			R = Integer.valueOf(hexVal.substring(0, 2), 16);
+			G = Integer.valueOf(hexVal.substring(2, 4), 16);
+			B = Integer.valueOf(hexVal.substring(4, 6), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		} else if (hexVal.length() <= 7 && hexVal.substring(0, 1).equals("#")) {
+			R = Integer.valueOf(hexVal.substring(1, 3), 16);
+			G = Integer.valueOf(hexVal.substring(3, 5), 16);
+			B = Integer.valueOf(hexVal.substring(5, 7), 16);
+			if (R <= 0) {
+				R = 1;
+			}
+		}
+
+		loc.setX(loc.getX() + Math.random() * (xOffset / 2 - -(xOffset / 2)));
+		loc.setY(loc.getY() + Math.random() * (yOffset / 2 - -(yOffset / 2)));
+		loc.setZ(loc.getZ() + Math.random() * (zOffset / 2 - -(zOffset / 2)));
+
+		ParticleEffect.RED_DUST.display(R, G, B, 0.004F, 0, loc, 257D);
 	}
 
 	public enum MapState {
