@@ -116,6 +116,7 @@ public class Mob {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
 		npc.addTrait(MissionTrait.class);
 		npc.data().set(NPC.GLOWING_METADATA, true);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		boss.put(1, npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
@@ -127,8 +128,9 @@ public class Mob {
 	}
 
 	public void spawnLit(Location loc) {
-		NPC npc = registry.createNPC(EntityType.PLAYER, "§4Red Guard");
+		NPC npc = registry.createNPC(EntityType.PLAYER, "§4Guard");
 		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "qosu");
 		boss.put(3, npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
@@ -142,6 +144,7 @@ public class Mob {
 	public void spawnLitGuards(Location loc) {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Robot");
 		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		round4.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
@@ -154,6 +157,7 @@ public class Mob {
 	public void spawnGuard(Location loc) {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
 		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		round3.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
@@ -164,6 +168,7 @@ public class Mob {
 	public void spawnRound1(final Location loc) {
 		final NPC npc = this.registry.createNPC(EntityType.PLAYER, "Robot");
 		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		round1.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
@@ -176,6 +181,7 @@ public class Mob {
 	public void spawnRound2(Location loc) {
 		final NPC npc = this.registry.createNPC(EntityType.PLAYER, "Robot");
 		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
 		round2.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {

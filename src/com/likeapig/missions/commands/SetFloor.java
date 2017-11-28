@@ -38,6 +38,11 @@ public class SetFloor extends Commands {
 			MessageManager.get().message(sender, "Floor 3 set for: " + m.getName(), MessageManager.MessageType.GOOD);
 			return;
 		}
+		if (args[1].equalsIgnoreCase("4")) {
+			m.setFloor(4, l);
+			MessageManager.get().message(sender, "Floor 4 set for: " + m.getName(), MessageManager.MessageType.GOOD);
+			return;
+		}
 		if (args[1].equalsIgnoreCase("1")) {
 			m.setFloor(1, l);
 			MessageManager.get().message(sender, "Floor 1 set for: " + m.getName(), MessageManager.MessageType.GOOD);

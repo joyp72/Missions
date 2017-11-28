@@ -151,7 +151,7 @@ public class Boss {
 		
 	}
 
-	public void Chair(Location location, Player p) {
+	public void Chair(Location location) {
 		
 		Location l = location.clone();
 		Location la = l.clone().subtract(0.53, 0, 0).add(0, 1.3, 0);
@@ -164,7 +164,6 @@ public class Boss {
 
 		ArmorStand body2 = NewArmorStand(l.clone().add(0.62, 0, 0), false, false);
 		body2.setHelmet(new ItemStack(Material.QUARTZ_BLOCK, 1, (byte)1));
-		//body2.setPassenger(p);
 		chairLoc = body2.getLocation(); 
 		
 		ArmorStand body3 = NewArmorStand(l.clone().add(1.24, 0, 0), false, false);

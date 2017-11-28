@@ -62,6 +62,7 @@ public class Map {
 	private Location bossLoc;
 	private Location bossLoc2;
 	private Location bossLoc3;
+	private Location bossLoc4;
 	private Location door1;
 	private Location door2;
 	private Location door3;
@@ -75,6 +76,7 @@ public class Map {
 	private Location b2f1;
 	private Location b2f2;
 	private Location b4f1;
+	private Location floor4;
 	private Location floor3;
 	private Location floor2;
 	private Location floor1;
@@ -87,6 +89,10 @@ public class Map {
 	private Location head2;
 	private Location head3;
 	private Location head4;
+	private Location console1;
+	private Location console2;
+	private Location console3;
+	private Location console4;
 	private List<Location> heads;
 	private Location rs;
 	private List<Location> chests;
@@ -414,6 +420,9 @@ public class Map {
 		if (this.bossLoc3 != null) {
 			Settings.get().set("maps." + this.getName() + ".bossLoc3", LocationUtils.locationToString(this.bossLoc3));
 		}
+		if (this.bossLoc4 != null) {
+			Settings.get().set("maps." + this.getName() + ".bossLoc4", LocationUtils.locationToString(this.bossLoc4));
+		}
 		if (this.door1 != null) {
 			Settings.get().set("maps." + this.getName() + ".door1", LocationUtils.locationToString(this.door1));
 		}
@@ -437,6 +446,18 @@ public class Map {
 		}
 		if (chest1 != null) {
 			Settings.get().set("maps." + this.getName() + ".chest1", LocationUtils.locationToString(chest1));
+		}
+		if (console1 != null) {
+			Settings.get().set("maps." + this.getName() + ".console1", LocationUtils.locationToString(console1));
+		}
+		if (console2 != null) {
+			Settings.get().set("maps." + this.getName() + ".console2", LocationUtils.locationToString(console2));
+		}
+		if (console3 != null) {
+			Settings.get().set("maps." + this.getName() + ".console3", LocationUtils.locationToString(console3));
+		}
+		if (console4 != null) {
+			Settings.get().set("maps." + this.getName() + ".console4", LocationUtils.locationToString(console4));
 		}
 		if (head1 != null) {
 			Settings.get().set("maps." + this.getName() + ".head1", LocationUtils.locationToString(head1));
@@ -477,6 +498,9 @@ public class Map {
 		if (floor3 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor3", LocationUtils.locationToString(floor3));
 		}
+		if (floor4 != null) {
+			Settings.get().set("maps." + this.getName() + ".floor4", LocationUtils.locationToString(floor4));
+		}
 		if (floor1 != null) {
 			Settings.get().set("maps." + this.getName() + ".floor1", LocationUtils.locationToString(floor1));
 		}
@@ -503,6 +527,11 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".bossLoc3");
 			(this.bossLoc3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.bossLoc3.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".bossLoc4") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".bossLoc4");
+			(this.bossLoc4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.bossLoc4.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".door1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".door1");
@@ -538,6 +567,26 @@ public class Map {
 			final String s3 = s.get("maps." + this.getName() + ".chest1");
 			(this.chest1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.chest1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".console1") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".console1");
+			(this.console1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.console1.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".console2") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".console2");
+			(this.console2 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.console2.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".console3") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".console3");
+			(this.console3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.console3.setYaw(LocationUtils.stringToYaw(s3));
+		}
+		if (s.get("maps." + this.getName() + ".console4") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".console4");
+			(this.console4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.console4.setYaw(LocationUtils.stringToYaw(s3));
 		}
 		if (s.get("maps." + this.getName() + ".head1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".head1");
@@ -609,6 +658,11 @@ public class Map {
 			(this.floor3 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
 			this.floor3.setYaw(LocationUtils.stringToYaw(s3));
 		}
+		if (s.get("maps." + this.getName() + ".floor4") != null) {
+			final String s3 = s.get("maps." + this.getName() + ".floor4");
+			(this.floor4 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
+			this.floor4.setYaw(LocationUtils.stringToYaw(s3));
+		}
 		if (s.get("maps." + this.getName() + ".floor1") != null) {
 			final String s3 = s.get("maps." + this.getName() + ".floor1");
 			(this.floor1 = LocationUtils.stringToLocation(s3)).setPitch(LocationUtils.stringToPitch(s3));
@@ -636,6 +690,18 @@ public class Map {
 			flag = true;
 		}
 		if (chest1 == null) {
+			flag = true;
+		}
+		if (console1 == null) {
+			flag = true;
+		}
+		if (console2 == null) {
+			flag = true;
+		}
+		if (console3 == null) {
+			flag = true;
+		}
+		if (console4 == null) {
 			flag = true;
 		}
 		if (head1 == null) {
@@ -674,6 +740,9 @@ public class Map {
 		if (this.bossLoc3 == null) {
 			flag = true;
 		}
+		if (this.bossLoc4 == null) {
+			flag = true;
+		}
 		if (this.door1 == null) {
 			flag = true;
 		}
@@ -690,6 +759,9 @@ public class Map {
 			flag = true;
 		}
 		if (floor3 == null) {
+			flag = true;
+		}
+		if (floor4 == null) {
 			flag = true;
 		}
 		if (floor1 == null) {
@@ -714,7 +786,8 @@ public class Map {
 		loadChests();
 		skinHeads();
 		this.setState(MapState.STARTED);
-		firstRound();
+		getPlayer().teleport(floor4);
+		finalBoss();
 	}
 
 	public void firstRound() {
@@ -769,6 +842,12 @@ public class Map {
 				spawnRobots();
 			}
 		}, 160L);
+	}
+	
+	public void finalBoss() {
+		setLocked(true);
+		setRound(4);
+		Final.get().spawnBoss(bossLoc4, this);
 	}
 
 	public void spawnGuards() {
@@ -890,6 +969,7 @@ public class Map {
 			if (p.getInventory().contains(card3)) {
 				p.getInventory().remove(card3);
 			}
+			Final.get().removeBoss();
 			Map.data.restore();
 			Map.data = null;
 			if (Map.data == null) {
@@ -970,6 +1050,7 @@ public class Map {
 				first = true;
 				second = true;
 				third = false;
+				Final.get().removeBoss();
 				setFloor(1);
 				setRound(1);
 			}
@@ -1031,10 +1112,55 @@ public class Map {
 			saveToConfig();
 			checkState();
 		}
+		if (i == 4) {
+			bossLoc4 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 
 	public List<Location> getChests() {
 		return chests;
+	}
+
+	public Location getConsole(int i) {
+		if (i == 1) {
+			return console1;
+		}
+		if (i == 2) {
+			return console2;
+		}
+		if (i == 3) {
+			return console3;
+		}
+		if (i == 4) {
+			return console4;
+		} else {
+			return null;
+		}
+	}
+
+	public void setConsole(int i, Location l) {
+		if (i == 1) {
+			console1 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 2) {
+			console2 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 3) {
+			console3 = l;
+			saveToConfig();
+			checkState();
+		}
+		if (i == 4) {
+			console4 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 
 	public Location getHead(int i) {
@@ -1233,6 +1359,9 @@ public class Map {
 		}
 		if (i == 3) {
 			return bossLoc3;
+		}
+		if (i == 4) {
+			return bossLoc4;
 		} else {
 			return null;
 		}
@@ -1265,6 +1394,11 @@ public class Map {
 			saveToConfig();
 			checkState();
 		}
+		if (i == 4) {
+			floor4 = l;
+			saveToConfig();
+			checkState();
+		}
 	}
 
 	public Location getFloor(int i) {
@@ -1276,6 +1410,9 @@ public class Map {
 		}
 		if (i == 3) {
 			return floor3;
+		}
+		if (i == 4) {
+			return floor4;
 		} else {
 			return null;
 		}

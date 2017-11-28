@@ -50,11 +50,11 @@ public class RaidListener implements Listener {
 	public void setup() {
 		Bukkit.getPluginManager().registerEvents((Listener) this, (Plugin) Main.get());
 	}
-	
+
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
-		Map m =  MapManager.get().getMap(p);
+		Map m = MapManager.get().getMap(p);
 		if (m != null) {
 			m.kickPlayer(p);
 		}
@@ -233,6 +233,39 @@ public class RaidListener implements Listener {
 					}
 				}
 			}
+			if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (edit.containsKey(MapManager.get().getMap("test"))) {
+					Map m = MapManager.get().getMap("test");
+					if (edit.get(m) == 71) {
+						m.setConsole(1, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set console for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 72) {
+						m.setConsole(2, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set console for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 73) {
+						m.setConsole(3, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set console for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+					if (edit.get(m) == 74) {
+						m.setConsole(4, e.getClickedBlock().getLocation());
+						MessageManager.get().message(p, "You set console for " + m.getName());
+						edit.clear();
+						editors.clear();
+						return;
+					}
+				}
+			}
 		}
 		if (map != null) {
 			if (!map.isLocked()) {
@@ -279,17 +312,25 @@ public class RaidListener implements Listener {
 							if (map.getFloor() == 3) {
 								if (map.isThird()) {
 									if (Lazer.get().isDead()) {
+										p.teleport(map.getFloor(4));
+										map.setFloor(4);
 										p.sendMessage("thats it so far :)");
+										return;
 									} else {
-										MessageManager.get().message(p, "You need to secure the redstone!", MessageType.BAD);
+										MessageManager.get().message(p, "You need to secure the redstone!",
+												MessageType.BAD);
 										map.breakRS();
+										return;
 									}
 								} else {
-									MessageManager.get().message(p, "The storage room is on the first floor!", MessageType.BAD);
+									MessageManager.get().message(p, "The storage room is on the first floor!",
+											MessageType.BAD);
+									return;
 								}
 							}
 						} else {
 							MessageManager.get().message(p, "You need to fix the teleporter first!", MessageType.BAD);
+							return;
 						}
 					}
 					if (map.getButtons(1).contains(e.getClickedBlock().getLocation())) {
