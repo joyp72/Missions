@@ -195,7 +195,7 @@ public class Lazer {
 				checked = false;
 				damaged = false;
 				show = true;
-				m.setT(0);
+				m.resetT(1);
 			}
 		}
 	}
@@ -284,7 +284,7 @@ public class Lazer {
 				cchecked = false;
 				ddamaged = false;
 				sshow = true;
-				m.setT(0);
+				m.resetT(2);
 			}
 		}
 	}
@@ -373,7 +373,7 @@ public class Lazer {
 				ccchecked = false;
 				dddamaged = false;
 				ssshow = true;
-				m.setT(0);
+				m.resetT(3);
 			}
 		}
 	}
@@ -462,7 +462,7 @@ public class Lazer {
 				cccchecked = false;
 				ddddamaged = false;
 				sssshow = true;
-				m.setT(0);
+				m.resetT(4);
 			}
 		}
 	}

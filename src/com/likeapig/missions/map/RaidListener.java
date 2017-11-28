@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -48,6 +49,15 @@ public class RaidListener implements Listener {
 
 	public void setup() {
 		Bukkit.getPluginManager().registerEvents((Listener) this, (Plugin) Main.get());
+	}
+	
+	@EventHandler
+	public void onLeave(PlayerQuitEvent e) {
+		Player p = e.getPlayer();
+		Map m =  MapManager.get().getMap(p);
+		if (m != null) {
+			m.kickPlayer(p);
+		}
 	}
 
 	@EventHandler

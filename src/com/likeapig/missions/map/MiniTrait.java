@@ -117,7 +117,7 @@ public class MiniTrait extends Trait {
 		if (npc.isSpawned()) {
 			t++;
 			setCharge(t, npc.getEntity().getLocation());
-			if (p != null) {
+			if (p != null && npc.getEntity() != null) {
 				if (npc.getEntity().getLocation().distance(p.getLocation()) <= 6) {
 					if (sound) {
 						p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.5f);

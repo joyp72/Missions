@@ -1,15 +1,14 @@
 package com.likeapig.missions;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.likeapig.missions.commands.CommandsManager;
 import com.likeapig.missions.map.Boss;
+import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
 import com.likeapig.missions.map.MiniTrait;
 import com.likeapig.missions.map.MissionTrait;
@@ -45,6 +44,12 @@ public class Main extends JavaPlugin {
 	}
 
 	public void onDisable() {
+		Map m = MapManager.get().getMap("test");
+		if (m != null) {
+			if (m.getStateName().equals("STARTED")) {
+				m.kickPlayer(m.getPlayer());
+			}
+		}
 		this.getLogger().info("Disabled!");
 	}
 }

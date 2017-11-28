@@ -105,6 +105,9 @@ public class Map {
 	private int i;
 	private int id = 0;
 	private int t = 0;
+	private int t2 = 0;
+	private int t3 = 0;
+	private int t4 = 0;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -789,10 +792,13 @@ public class Map {
 			@Override
 			public void run() {
 				t++;
+				t2++;
+				t3++;
+				t4++;
 				Lazer.get().lazer1(t, head1, getPlayer().getLocation(), getPlayer(), getMap());
-				Lazer.get().lazer2(t, head2, getPlayer().getLocation(), getPlayer(), getMap());
-				Lazer.get().lazer3(t, head3, getPlayer().getLocation(), getPlayer(), getMap());
-				Lazer.get().lazer4(t, head4, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer2(t2, head2, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer3(t3, head3, getPlayer().getLocation(), getPlayer(), getMap());
+				Lazer.get().lazer4(t4, head4, getPlayer().getLocation(), getPlayer(), getMap());
 			}
 		}, 0L, 0L);
 	}
@@ -875,7 +881,6 @@ public class Map {
 	public void removePlayer(final Player p) {
 		if (this.containsPlayer(p)) {
 			Bukkit.getServer().getScheduler().cancelTask(id);
-			p.stopSound(Sound.RECORD_MELLOHI);
 			if (p.getInventory().contains(card1)) {
 				p.getInventory().remove(card1);
 			}
@@ -958,6 +963,9 @@ public class Map {
 				}
 				i = 1;
 				t = 0;
+				t2 = 0;
+				t3 = 0;
+				t4 = 0;
 				Lazer.get().reset();
 				first = true;
 				second = true;
@@ -978,8 +986,19 @@ public class Map {
 		}
 	}
 
-	public void setT(int i) {
-		t = i;
+	public void resetT(int i) {
+		if (i == 1) {
+			t = 0;
+		}
+		if (i == 2) {
+			t2 = 0;
+		}
+		if (i == 3) {
+			t3 = 0;
+		}
+		if (i == 4) {
+			t4 = 0;
+		}
 	}
 
 	public boolean isStarted() {

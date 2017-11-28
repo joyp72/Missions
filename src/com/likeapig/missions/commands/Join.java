@@ -12,8 +12,8 @@ public class Join extends Commands
     @Override
     public void onCommand(final Player sender, final String[] args) {
         final Map a = MapManager.get().getMap("test");
-        if (a.containsPlayer(sender)) {
-            MessageManager.get().message(sender, "You are already in a map", MessageManager.MessageType.BAD);
+        if (a.getStateName().equals("STARTED")) {
+            MessageManager.get().message(sender, "The map is being used by another player.", MessageManager.MessageType.BAD);
             return;
         }
         final Map a2 = MapManager.get().getMap("test");
