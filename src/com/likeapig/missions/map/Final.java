@@ -6,13 +6,13 @@ import org.bukkit.util.Vector;
 
 import com.likeapig.missions.Main;
 
+import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 import net.md_5.bungee.api.ChatColor;
 
 public class Final {
 
 	public static Final instance;
 	private boolean spawned = false;
-	private boolean met = false;
 	private int id;
 
 	static {
@@ -27,22 +27,31 @@ public class Final {
 		if (!spawned) {
 			Boss.get().Chair(loc);
 			Boss.get().setNPC();
+			Boss.get().spawnLook();
 			id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
 				@Override
 				public void run() {
-					if (!met) {
+					Boss.get().look(m.getPlayer().getLocation());
+					int body = (int) getDegrees(Boss.get().getParts().get("body2").getLocation());
+					int entity = (int) 5 * (Math.round(getDegrees(Boss.get().getLook().getEntity().getLocation()) / 5));
+					if (body < entity) {
 						Boss.get().rotateRight();
 					}
-					if (Boss.get().getParts().get("body2").getLocation().getDirection() == getDirection(
-							Boss.get().getParts().get("body2").getLocation(), m.getPlayer().getLocation())) {
-						met = true;
+					if (body > entity) {
+						Boss.get().rotateLeft();
 					}
-					m.getPlayer().sendMessage(ChatColor.RED + Boss.get().getParts().get("body2").getLocation().getDirection().toString());
-					m.getPlayer().sendMessage(ChatColor.GREEN + getDirection(
-							Boss.get().getParts().get("body2").getLocation(), m.getPlayer().getLocation()).toString());
+					Boss.get().getNPC().faceLocation(m.getPlayer().getLocation());
 				}
-			}, 0L, 20L);
+			}, 0L, 0L);
 			spawned = true;
+		}
+	}
+
+	public float getDegrees(Location l) {
+		if (l.getYaw() >= 0) {
+			return l.getYaw();
+		} else {
+			return 360 - Math.abs(l.getYaw());
 		}
 	}
 

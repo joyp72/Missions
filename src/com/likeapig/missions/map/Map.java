@@ -788,6 +788,7 @@ public class Map {
 		this.setState(MapState.STARTED);
 		getPlayer().teleport(floor4);
 		finalBoss();
+		Lazer.get();
 	}
 
 	public void firstRound() {
@@ -843,7 +844,7 @@ public class Map {
 			}
 		}, 160L);
 	}
-	
+
 	public void finalBoss() {
 		setLocked(true);
 		setRound(4);
@@ -1004,57 +1005,59 @@ public class Map {
 	public void stop() {
 		// Timer.get().stopTasks(this);
 		this.setState(MapState.WAITING);
-		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+		// Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
 
-			@Override
-			public void run() {
-				for (final NPC NPCs : round1) {
-					registry.deregister(NPCs);
-				}
-				round1.clear();
-				for (final NPC NPCs : round2) {
-					registry.deregister(NPCs);
-				}
-				round2.clear();
-				for (NPC NPCs : round3) {
-					registry.deregister(NPCs);
-				}
-				round3.clear();
-				for (NPC NPCs : round4) {
-					registry.deregister(NPCs);
-				}
-				round4.clear();
-				for (NPC NPCs : boss.values()) {
-					registry.deregister(NPCs);
-				}
-				boss.clear();
-				for (Location loc : tempchests) {
-					chests.add(loc);
-					Block b = loc.getBlock();
-					Chest c = (Chest) b.getState();
-					Inventory ci = c.getInventory();
-					ci.clear();
-				}
-				tempchests.clear();
-				if (isRS()) {
-					Block b = rs.getBlock();
-					b.setType(Material.AIR);
-					b.getState().update();
-				}
-				i = 1;
-				t = 0;
-				t2 = 0;
-				t3 = 0;
-				t4 = 0;
-				Lazer.get().reset();
-				first = true;
-				second = true;
-				third = false;
-				Final.get().removeBoss();
-				setFloor(1);
-				setRound(1);
-			}
-		}, 1);
+		// @Override
+		// public void run() {
+		for (final NPC NPCs : round1) {
+			registry.deregister(NPCs);
+		}
+		round1.clear();
+		for (final NPC NPCs : round2) {
+			registry.deregister(NPCs);
+		}
+		round2.clear();
+		for (NPC NPCs : round3) {
+			registry.deregister(NPCs);
+		}
+		round3.clear();
+		for (NPC NPCs : round4) {
+			registry.deregister(NPCs);
+		}
+		round4.clear();
+		for (NPC NPCs : boss.values()) {
+			registry.deregister(NPCs);
+		}
+		boss.clear();
+		for (Location loc : tempchests) {
+			chests.add(loc);
+			Block b = loc.getBlock();
+			Chest c = (Chest) b.getState();
+			Inventory ci = c.getInventory();
+			ci.clear();
+		}
+		tempchests.clear();
+		if (isRS()) {
+			Block b = rs.getBlock();
+			b.setType(Material.AIR);
+			b.getState().update();
+		}
+		i = 1;
+		t = 0;
+		t2 = 0;
+		t3 = 0;
+		t4 = 0;
+		if (Lazer.class != null) {
+			Lazer.get().reset();
+		}
+		first = true;
+		second = true;
+		third = false;
+		Final.get().removeBoss();
+		setFloor(1);
+		setRound(1);
+		// }
+		// }, 1);
 	}
 
 	public void breakRS() {
