@@ -88,6 +88,7 @@ public class MissionTrait extends Trait {
 		if (map.getPlayer() != null) {
 			npc.getNavigator().setTarget(map.getPlayer(), true);
 			npc.getNavigator().getLocalParameters().range(100f);
+			npc.faceLocation(map.getPlayer().getLocation());
 		}
 	}
 

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 
 import com.likeapig.missions.models.LawnMower;
 
@@ -52,15 +53,20 @@ public class Boss {
 		return parts;
 	}
 	
-	public void setNPC(Location l) {
+	public void setNPC() {
 		npc = this.registry.createNPC(EntityType.PLAYER, "Robot");
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Robocop");
-		npc.spawn(l);
+		npc.addTrait(MissionTrait.class);
+		npc.spawn(getParts().get("body2").getLocation());
 		getParts().get("body2").setPassenger(npc.getEntity());
 	}
 	
 	public void setNPCYaw(Location l) {
 		npc.getEntity().getLocation().setYaw(l.getYaw());
+	}
+	
+	public void removeNPC() {
+		registry.deregister(npc);
 	}
 	
 	public void tpSeat(ArmorStand as, Location loc) {
@@ -91,6 +97,21 @@ public class Boss {
 			tpSeat(entity, point);
 		}
 		return vec;
+	}
+	
+	public static Vector getDirection(Location location, Location destination) {
+		double x1, y1, z1;
+		double x0, y0, z0;
+
+		x1 = destination.getX();
+		y1 = destination.getY();
+		z1 = destination.getZ();
+
+		x0 = location.getX();
+		y0 = location.getY();
+		z0 = location.getZ();
+
+		return new Vector(x1 - x0, y1 - y0, z1 - z0);
 	}
 
 	public ArmorStand NewArmorStand(Location location, boolean visible, boolean mini) {

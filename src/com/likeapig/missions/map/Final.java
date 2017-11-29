@@ -6,6 +6,8 @@ import org.bukkit.util.Vector;
 
 import com.likeapig.missions.Main;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class Final {
 
 	public static Final instance;
@@ -24,6 +26,7 @@ public class Final {
 	public void spawnBoss(Location loc, Map m) {
 		if (!spawned) {
 			Boss.get().Chair(loc);
+			Boss.get().setNPC();
 			id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
 				@Override
 				public void run() {
@@ -34,8 +37,11 @@ public class Final {
 							Boss.get().getParts().get("body2").getLocation(), m.getPlayer().getLocation())) {
 						met = true;
 					}
+					m.getPlayer().sendMessage(ChatColor.RED + Boss.get().getParts().get("body2").getLocation().getDirection().toString());
+					m.getPlayer().sendMessage(ChatColor.GREEN + getDirection(
+							Boss.get().getParts().get("body2").getLocation(), m.getPlayer().getLocation()).toString());
 				}
-			}, 0L, 0L);
+			}, 0L, 20L);
 			spawned = true;
 		}
 	}
@@ -43,6 +49,7 @@ public class Final {
 	public void removeBoss() {
 		if (spawned) {
 			Boss.get().removeChair();
+			Boss.get().removeNPC();
 			Bukkit.getServer().getScheduler().cancelTask(id);
 			spawned = false;
 		}
