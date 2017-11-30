@@ -370,6 +370,9 @@ public class Map {
 			message("A guard has been deployed.");
 			secondRound();
 		}
+		if (getRound() == 5 && round1.size() == 0) {
+			Final.get().setRoundOver(1);
+		}
 	}
 
 	public void loadLoot() {
@@ -847,7 +850,7 @@ public class Map {
 
 	public void finalBoss() {
 		setLocked(true);
-		setRound(4);
+		setRound(5);
 		Final.get().spawnBoss(bossLoc4, this);
 	}
 

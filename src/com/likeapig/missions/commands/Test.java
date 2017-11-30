@@ -1,8 +1,11 @@
 package com.likeapig.missions.commands;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ShulkerBullet;
 
+import com.likeapig.missions.Main;
 import com.likeapig.missions.map.Boss;
 
 public class Test extends Commands {
@@ -15,15 +18,16 @@ public class Test extends Commands {
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
-		ShulkerBullet sb = p.getWorld().spawn(Boss.get().getParts().get("leftbutton").getLocation(), ShulkerBullet.class);
-		sb.setInvulnerable(true);
-		sb.setShooter(p);
-		sb.setTarget(p);
-		sb.setVelocity(sb.getLocation().getDirection().normalize().multiply(1));
-		ShulkerBullet sb2 = p.getWorld().spawn(Boss.get().getParts().get("rightbutton").getLocation(), ShulkerBullet.class);
-		sb2.setInvulnerable(true);
-		sb2.setShooter(p);
-		sb2.setTarget(p);
-		sb2.setVelocity(sb2.getLocation().getDirection().normalize().multiply(1));
+		Fireball fb = p.getWorld().spawn(p.getLocation().add(p.getLocation().getDirection()), Fireball.class);
+		fb.setVelocity(p.getLocation().getDirection().multiply(1));
+		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				fb.setVelocity(p.getLocation().getDirection());
+				if (fb.isDead() || p.getLocation().distance(fb.getLocation()) > 40) {
+					return;
+				}
+			}
+		}, 0L, 0L);
 	}
 }

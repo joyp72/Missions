@@ -63,6 +63,7 @@ public class Boss {
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "scientist");
 		npc.addTrait(MissionTrait.class);
 		npc.spawn(getParts().get("body2").getLocation());
+		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
 		getParts().get("body2").setPassenger(npc.getEntity());
 	}
 

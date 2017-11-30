@@ -10,10 +10,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -97,6 +99,13 @@ public class RaidListener implements Listener {
 				e.setKeepInventory(true);
 				m.kickPlayer(p, "You died!", false);
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onExplode(EntityExplodeEvent e) {
+		if (e.getEntity() instanceof Fireball) {
+			e.setCancelled(true);
 		}
 	}
 
