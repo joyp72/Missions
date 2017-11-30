@@ -383,6 +383,9 @@ public class Map {
 		if (getRound() == 5 && round1.size() == 0) {
 			Final.get().setRoundOver(1);
 		}
+		if (getRound() == 5 && Final.get().getRound() == 2 && round3.size() == 0) {
+			Final.get().setRoundOver(1);
+		}
 	}
 
 	public void loadLoot() {
