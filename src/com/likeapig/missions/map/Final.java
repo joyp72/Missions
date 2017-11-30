@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,7 +19,7 @@ import com.likeapig.missions.Main;
 import com.likeapig.missions.utils.ParticleEffect;
 import com.likeapig.missions.utils.Titles;
 
-import net.md_5.bungee.api.ChatColor;
+import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 
 public class Final {
 
@@ -29,9 +30,15 @@ public class Final {
 	private int t2 = 0;
 	boolean reached1 = false;
 	boolean reached2 = false;
-	boolean round1 = true;
+	boolean round1 = false;
 	Fireball fb;
 	Fireball fb2;
+	public FurnitureLib ins = FurnitureLib.getInstance();
+	boolean d1 = false;
+	boolean d2 = false;
+	boolean d3 = false;
+	boolean d4 = false;
+	List<Location> destroyed = new ArrayList<Location>();
 
 	static {
 		instance = new Final();
@@ -63,16 +70,21 @@ public class Final {
 						t++;
 						t2++;
 						fireBall(t, Boss.get().getParts().get("leftbutton").getEyeLocation(),
-								m.getPlayer().getLocation());
+								m.getPlayer().getLocation(), m);
 						fireBall2(t2, Boss.get().getParts().get("rightbutton").getEyeLocation(),
-								m.getPlayer().getLocation());
+								m.getPlayer().getLocation(), m);
+					}
+					if (destroyed.size() != 0) {
+						for (Location ds : destroyed) {
+							destroyConsole(ds);
+						}
 					}
 				}
 			}, 0L, 0L);
 			spawned = true;
-			//Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 160);
-			//Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + "You really think you can beat me?! HAHAHA", 140);
-			// spawnRound1(loc);
+			Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 160);
+			Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + "You really think you can beat me?! HAHAHA", 140);
+			spawnRound1(loc);
 		}
 	}
 
@@ -94,7 +106,7 @@ public class Final {
 		}, 160L);
 	}
 
-	public void fireBall(int i, Location from, Location to) {
+	public void fireBall(int i, Location from, Location to, Map m) {
 		if (!reached1) {
 			Location l = null;
 			Vector v = null;
@@ -114,6 +126,16 @@ public class Final {
 				fb = from.getWorld().spawn(l.add(l.getDirection()), Fireball.class);
 			}
 			if (i > 120) {
+				for (Location console : m.getConsoles()) {
+					if (fb.getLocation().distance(console) <= 4) {
+						if (!destroyed.contains(console)) {
+							destroyed.add(console);
+						}
+						reached1 = true;
+						this.t = 0;
+						return;
+					}
+				}
 				if (fb != null) {
 					if (fb.isDead()) {
 						reached1 = true;
@@ -127,7 +149,7 @@ public class Final {
 		}
 	}
 
-	public void fireBall2(int i, Location from, Location to) {
+	public void fireBall2(int i, Location from, Location to, Map m) {
 		if (!reached2) {
 			Location l = null;
 			Vector v = null;
@@ -147,6 +169,16 @@ public class Final {
 				fb2 = from.getWorld().spawn(l.add(l.getDirection()), Fireball.class);
 			}
 			if (i > 120) {
+				for (Location console : m.getConsoles()) {
+					if (fb2.getLocation().distance(console) <= 4) {
+						if (!destroyed.contains(console)) {
+							destroyed.add(console);
+						}
+						reached2 = true;
+						this.t2 = 0;
+						return;
+					}
+				}
 				if (fb2 != null) {
 					if (fb2.isDead()) {
 						reached2 = true;
@@ -160,14 +192,19 @@ public class Final {
 		}
 	}
 
+	public void destroyConsole(Location l) {
+		ParticleEffect.SMOKE.display(l, 0.0f, 0.0f, 0.0f, 0.0f, 30);
+	}
+
 	public void removeBoss() {
 		if (spawned) {
 			Boss.get().removeChair();
 			Boss.get().removeNPC();
 			Bukkit.getServer().getScheduler().cancelTask(id);
+			destroyed.clear();
 			reached1 = false;
 			reached2 = false;
-			round1 = true;
+			round1 = false;
 			t = 0;
 			t2 = 0;
 			spawned = false;

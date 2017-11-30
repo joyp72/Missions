@@ -93,6 +93,7 @@ public class Map {
 	private Location console2;
 	private Location console3;
 	private Location console4;
+	private List<Location> consoles;
 	private List<Location> heads;
 	private Location rs;
 	private List<Location> chests;
@@ -114,6 +115,7 @@ public class Map {
 	private int t2 = 0;
 	private int t3 = 0;
 	private int t4 = 0;
+	private HashMap<Location, Block> backup;
 	NPCRegistry registry;
 
 	public Map(final String s) {
@@ -138,6 +140,8 @@ public class Map {
 		seventyfive = new ArrayList<String>();
 		eighty = new ArrayList<String>();
 		heads = new ArrayList<Location>();
+		consoles = new ArrayList<Location>();
+		backup = new HashMap<Location, Block>();
 		fifteen.add(Material.IRON_INGOT.toString());
 		fifteen.add(Material.IRON_HELMET.toString());
 		fifteen.add(Material.IRON_CHESTPLATE.toString());
@@ -230,6 +234,12 @@ public class Map {
 			heads.add(head2);
 			heads.add(head3);
 			heads.add(head4);
+		}
+		if (console1 != null && console2 != null && console3 != null && console4 != null) {
+			consoles.add(console1);
+			consoles.add(console2);
+			consoles.add(console3);
+			consoles.add(console4);
 		}
 		saveToConfig();
 		this.checkState();
@@ -902,6 +912,10 @@ public class Map {
 				}
 			}
 		}
+	}
+	
+	public List<Location> getConsoles() {
+		return consoles;
 	}
 
 	public int getRound() {
