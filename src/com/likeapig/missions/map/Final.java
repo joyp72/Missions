@@ -27,18 +27,19 @@ public class Final {
 	private boolean spawned = false;
 	private int id;
 	private int t = 0;
-	private int t2 = 0;
-	boolean reached1 = false;
-	boolean reached2 = false;
-	boolean round1 = false;
+	public static boolean reached1 = false;
+	public static boolean round1 = false;
 	Fireball fb;
 	Fireball fb2;
+	List<Fireball> fbs = new ArrayList<Fireball>();
 	public FurnitureLib ins = FurnitureLib.getInstance();
 	boolean d1 = false;
 	boolean d2 = false;
 	boolean d3 = false;
 	boolean d4 = false;
 	List<Location> destroyed = new ArrayList<Location>();
+	public static boolean hit = false;
+	public static boolean check = false;
 
 	static {
 		instance = new Final();
@@ -66,25 +67,33 @@ public class Final {
 						Boss.get().rotateLeft();
 					}
 					Boss.get().getNPC().faceLocation(m.getPlayer().getLocation());
-					if (!reached1 && !reached2 && round1) {
+					if (!reached1 && round1) {
 						t++;
-						t2++;
-						fireBall(t, Boss.get().getParts().get("leftbutton").getEyeLocation(),
-								m.getPlayer().getLocation(), m);
-						fireBall2(t2, Boss.get().getParts().get("rightbutton").getEyeLocation(),
-								m.getPlayer().getLocation(), m);
+						fireBall(t, Boss.get().getParts().get("leftbutton").getEyeLocation(), m.getPlayer().getLocation(), m, Boss.get().getParts().get("rightbutton").getEyeLocation(), m.getPlayer().getLocation());
+						// fireBall2(t2, Boss.get().getParts().get("rightbutton").getEyeLocation(),
+						// m.getPlayer().getLocation(), m);
 					}
 					if (destroyed.size() != 0) {
 						for (Location ds : destroyed) {
 							destroyConsole(ds);
 						}
 					}
+					if (!hit) {
+						if (destroyed.isEmpty()) {
+							round1 = false;
+							reached1 = false;
+							spawnRound1(loc);
+							hit = true;
+						}
+					}
 				}
 			}, 0L, 0L);
 			spawned = true;
-			Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 160);
-			Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + "You really think you can beat me?! HAHAHA", 140);
-			spawnRound1(loc);
+			// Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD +
+			// "MAD SCIENTIST", 160);
+			// Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + "You really think
+			// you can beat me?! HAHAHA", 140);
+			// spawnRound1(loc);
 		}
 	}
 
@@ -103,90 +112,58 @@ public class Final {
 				Mob.get().spawnRound1(loc.clone().add(4, 0, 0).subtract(0, 0, 5));
 				Mob.get().spawnRound1(loc.clone().subtract(4, 0, 5));
 			}
-		}, 160L);
+		}, 60L);
 	}
 
-	public void fireBall(int i, Location from, Location to, Map m) {
+	public void fireBall(int i, Location from, Location to, Map m, Location from2, Location to2) {
 		if (!reached1) {
 			Location l = null;
+			Location l2 = null;
 			Vector v = null;
+			Vector v2 = null;
 			if (i >= 0 && i <= 60) {
 				Location loc = from.clone().add(0, 0.5, 0);
 				displayColoredParticle(loc, "ff7400");
+				Location loc2 = from2.clone().add(0, 0.5, 0);
+				displayColoredParticle(loc2, "ff7400");
 			}
 			if (i > 60 && i < 120) {
 				Location loc = from.clone().add(0, 0.5, 0);
 				displayColoredParticle(loc, "ff2700");
 				ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 10);
+				Location loc2 = from2.clone().add(0, 0.5, 0);
+				displayColoredParticle(loc2, "ff2700");
+				ParticleEffect.SMOKE.display(loc2, 0.0f, 0.0f, 0.0f, 0.0f, 10);
 			}
 			if (i == 120) {
 				l = from.clone();
 				v = getDirection(l, to.add(0, 3, 0));
 				l.add(v.normalize().multiply(2));
 				fb = from.getWorld().spawn(l.add(l.getDirection()), Fireball.class);
+				l2 = from2.clone();
+				v2 = getDirection(l2, to2.add(0, 3, 0));
+				l2.add(v2.normalize().multiply(2));
+				fb2 = from2.getWorld().spawn(l2.add(l2.getDirection()), Fireball.class);
+				fbs.add(fb);
+				fbs.add(fb2);
 			}
 			if (i > 120) {
 				for (Location console : m.getConsoles()) {
-					if (fb.getLocation().distance(console) <= 4) {
+					if (fb.getLocation().distance(console) <= 4 || fb2.getLocation().distance(console) <= 4) {
 						if (!destroyed.contains(console)) {
-							destroyed.add(console);
+							destroyed.add(console.clone().add(0.5, 0.5, 0.5));
+							m.message("A console has been destroyed!");
 						}
-						reached1 = true;
-						this.t = 0;
-						return;
+						hit = true;
+						check = true;
 					}
 				}
-				if (fb != null) {
-					if (fb.isDead()) {
-						reached1 = true;
-						this.t = 0;
+				if (fb.isDead() || fb2.isDead()) {
+					if (!check) {
+						hit = false;
 					}
-				} else {
 					reached1 = true;
 					this.t = 0;
-				}
-			}
-		}
-	}
-
-	public void fireBall2(int i, Location from, Location to, Map m) {
-		if (!reached2) {
-			Location l = null;
-			Vector v = null;
-			if (i >= 0 && i <= 60) {
-				Location loc = from.clone().add(0, 0.5, 0);
-				displayColoredParticle(loc, "ff7400");
-			}
-			if (i > 60 && i < 120) {
-				Location loc = from.clone().add(0, 0.5, 0);
-				displayColoredParticle(loc, "ff2700");
-				ParticleEffect.SMOKE.display(loc, 0.0f, 0.0f, 0.0f, 0.0f, 10);
-			}
-			if (i == 120) {
-				l = from.clone();
-				v = getDirection(l, to.add(0, 3, 0));
-				l.add(v.normalize().multiply(2));
-				fb2 = from.getWorld().spawn(l.add(l.getDirection()), Fireball.class);
-			}
-			if (i > 120) {
-				for (Location console : m.getConsoles()) {
-					if (fb2.getLocation().distance(console) <= 4) {
-						if (!destroyed.contains(console)) {
-							destroyed.add(console);
-						}
-						reached2 = true;
-						this.t2 = 0;
-						return;
-					}
-				}
-				if (fb2 != null) {
-					if (fb2.isDead()) {
-						reached2 = true;
-						this.t2 = 0;
-					}
-				} else {
-					reached2 = true;
-					this.t2 = 0;
 				}
 			}
 		}
@@ -202,13 +179,18 @@ public class Final {
 			Boss.get().removeNPC();
 			Bukkit.getServer().getScheduler().cancelTask(id);
 			destroyed.clear();
+			fbs.clear();
 			reached1 = false;
-			reached2 = false;
 			round1 = false;
+			check = false;
+			hit = false;
 			t = 0;
-			t2 = 0;
 			spawned = false;
 		}
+	}
+
+	public List<Fireball> getFbs() {
+		return fbs;
 	}
 
 	public float getDegrees(Location l) {

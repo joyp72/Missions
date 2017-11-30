@@ -11,13 +11,16 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -77,6 +80,17 @@ public class RaidListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler
+	public void onFrameBreak(EntityDamageByEntityEvent e) {
+		if (e.getEntity() instanceof ItemFrame) {
+			if (e.getDamager() instanceof Fireball) {
+				if (Final.get().getFbs().contains(e.getDamager())) {
+					e.setCancelled(true);
+				}
+			}
+		}
+	}
 
 	@EventHandler
 	public void onNPCDeath(NPCDeathEvent e) {
@@ -105,7 +119,10 @@ public class RaidListener implements Listener {
 	@EventHandler
 	public void onExplode(EntityExplodeEvent e) {
 		if (e.getEntity() instanceof Fireball) {
-			e.setCancelled(true);
+			if (Final.get().getFbs().contains(e.getEntity())) {
+				e.setCancelled(true);
+				return;
+			}
 		}
 	}
 

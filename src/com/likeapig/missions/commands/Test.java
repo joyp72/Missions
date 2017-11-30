@@ -7,6 +7,7 @@ import org.bukkit.entity.ShulkerBullet;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.map.Boss;
+import com.likeapig.missions.map.Final;
 
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 
@@ -21,6 +22,9 @@ public class Test extends Commands {
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
-		ins.spawn(ins.getFurnitureManager().getProject("Flag"), p.getLocation());
+		p.sendMessage("reached1 = " + Final.reached1);
+		p.sendMessage("round1 = " + Final.round1);
+		p.sendMessage("hit = " + Final.hit);
+		p.sendMessage("check = " + Final.check);
 	}
 }
