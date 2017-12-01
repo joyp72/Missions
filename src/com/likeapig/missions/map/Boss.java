@@ -61,7 +61,7 @@ public class Boss {
 	public void setNPC() {
 		npc = this.registry.createNPC(EntityType.PLAYER, "§4§lSCIENTIST");
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "scientist");
-		npc.addTrait(MissionTrait.class);
+		npc.addTrait(SentinelTrait.class);
 		npc.spawn(getParts().get("body2").getLocation());
 		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
 		getParts().get("body2").setPassenger(npc.getEntity());

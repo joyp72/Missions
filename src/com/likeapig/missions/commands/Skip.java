@@ -2,6 +2,7 @@ package com.likeapig.missions.commands;
 
 import org.bukkit.entity.Player;
 
+import com.likeapig.missions.map.Final;
 import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
 
@@ -73,6 +74,40 @@ public class Skip extends Commands {
 			m.message("You picked up a Storage Keycard!");
 			m.setLocked(false);
 			return;
+		}
+		if (m.getRound() == 5) {
+			if (Final.get().getRound() == 1) {
+				for (NPC npcs : m.getRoundNPC(1)) {
+					registry.deregister(npcs);
+				}
+				m.getRoundNPC(1).clear();
+				Final.get().setFire(true);
+				return;
+			}
+			if (Final.get().getRound() == 2) {
+				for (NPC npcs : m.getRoundNPC(3)) {
+					registry.deregister(npcs);
+				}
+				m.getRoundNPC(3).clear();
+				Final.get().setFire(true);
+				return;
+			}
+			if (Final.get().getRound() == 3) {
+				for (NPC npcs : m.getRoundNPC(4)) {
+					registry.deregister(npcs);
+				}
+				m.getRoundNPC(4).clear();
+				Final.get().setFire(true);
+				return;
+			}
+			if (Final.get().getRound() == 4) {
+				for (NPC npcs : m.getRoundNPC(2)) {
+					registry.deregister(npcs);
+				}
+				m.getRoundNPC(2).clear();
+				Final.get().setFire(true);
+				return;
+			}
 		}
 
 	}

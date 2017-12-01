@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/sentinel-1.4.5.jar"/>
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/ProtocolLib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/FurnitureLib.jar"/>
+	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/SimpleSit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

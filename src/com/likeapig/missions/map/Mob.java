@@ -111,6 +111,13 @@ public class Mob {
 		boss.put(2, npc);
 		npc.spawn(loc);
 	}
+	
+	public void spawnT2000(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "T-2000");
+		npc.addTrait(MiniTrait.class);
+		round2.add(npc);
+		npc.spawn(loc);
+	}
 
 	public void Floor1Boss(final Location loc) {
 		NPC npc = registry.createNPC(EntityType.PLAYER, "Guard");
@@ -137,6 +144,20 @@ public class Mob {
 			Damageable entity = (Damageable) npc.getEntity();
 			entity.setMaxHealth(30);
 			entity.setHealth(30);
+			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(litStick);
+		}
+	}
+	
+	public void spawnLits(Location loc) {
+		NPC npc = registry.createNPC(EntityType.PLAYER, "§4Guard");
+		npc.addTrait(MissionTrait.class);
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "qosu");
+		round4.add(npc);
+		npc.spawn(loc);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(15);
+			entity.setHealth(15);
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(litStick);
 		}
 	}

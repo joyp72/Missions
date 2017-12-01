@@ -178,7 +178,12 @@ public class MiniTrait extends Trait {
 							p.getWorld().playSound(npc.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f,
 									0.5f);
 							if (armor <= 0) {
-								((Damageable) npc.getEntity()).damage(11);
+								if (Final.get().getRound() == 4) {
+									((Damageable) npc.getEntity())
+											.damage(((Damageable) npc.getEntity()).getMaxHealth());
+								} else {
+									((Damageable) npc.getEntity()).damage(11);
+								}
 								armor = 3;
 							} else {
 								armor--;
@@ -279,7 +284,7 @@ public class MiniTrait extends Trait {
 		npc.getNavigator().setTarget(map.getPlayer(), true);
 		npc.getNavigator().getLocalParameters().range(100f);
 		setArmor(armor);
-	} 
+	}
 
 	// run code when the NPC is removed. Use this to tear down any repeating tasks.
 	@Override

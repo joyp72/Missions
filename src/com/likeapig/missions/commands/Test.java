@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import com.likeapig.missions.map.Final;
 
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
+import net.apcat.simplesit.SimpleSit;
+import net.apcat.simplesit.SimpleSitPlayer;
 
 public class Test extends Commands {
 	public Test() {
@@ -17,8 +19,7 @@ public class Test extends Commands {
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
-		p.sendMessage(Integer.toString(Final.get().getRound()));
-		p.sendMessage(Integer.toString(Final.get().getDestroyed().size()));
-		p.sendMessage(Boolean.toString(Final.hit));
+		SimpleSitPlayer sp = new SimpleSitPlayer(p);
+		sp.setLaying(true);
 	}
 }

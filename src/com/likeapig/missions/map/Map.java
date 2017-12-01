@@ -380,11 +380,17 @@ public class Map {
 			message("A guard has been deployed.");
 			secondRound();
 		}
-		if (getRound() == 5 && round1.size() == 0) {
-			Final.get().setRoundOver(1);
+		if (getRound() == 5 && Final.get().getRound() == 1 && round1.size() == 0) {
+			Final.get().setFire(true);
 		}
-		if (getRound() == 5 && Final.get().getRound() == 2 && round3.size() == 0) {
-			Final.get().setRoundOver(1);
+		if (getRound() == 5 && Final.get().getRound() == 2 && Mob.get().getRound(3).size() == 0) {
+			Final.get().setFire(true);
+		}
+		if (getRound() == 5 && Final.get().getRound() == 3 && Mob.get().getRound(4).size() == 0) {
+			Final.get().setFire(true);
+		}
+		if (getRound() == 5 && Final.get().getRound() == 4 && Mob.get().getRound(2).size() == 0) {
+			Final.get().setFire(true);
 		}
 	}
 

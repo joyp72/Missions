@@ -14,12 +14,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.utils.ParticleEffect;
 import com.likeapig.missions.utils.Titles;
 
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
+import net.apcat.simplesit.SimpleSitPlayer;
+import net.citizensnpcs.api.npc.NPC;
+import net.minecraft.server.v1_12_R1.Packet;
 
 public class Final {
 
@@ -27,8 +31,8 @@ public class Final {
 	private boolean spawned = false;
 	private int id;
 	private int t = 0;
-	public static boolean reached1 = false;
-	public static boolean round1 = false;
+	// public static boolean reached1 = false;
+	public static boolean fire = false;
 	Fireball fb;
 	Fireball fb2;
 	List<Fireball> fbs = new ArrayList<Fireball>();
@@ -40,7 +44,8 @@ public class Final {
 	List<Location> destroyed = new ArrayList<Location>();
 	public static boolean hit = false;
 	public static boolean check = false;
-	int round = 1;
+	public boolean once = false;
+	int round = 5;
 
 	static {
 		instance = new Final();
@@ -59,16 +64,19 @@ public class Final {
 				@Override
 				public void run() {
 					Boss.get().look(m.getPlayer().getLocation());
-					int body = (int) getDegrees(Boss.get().getParts().get("body2").getLocation());
-					int entity = (int) 5 * (Math.round(getDegrees(Boss.get().getLook().getEntity().getLocation()) / 5));
-					if (body < entity) {
-						Boss.get().rotateRight();
+					if (round != 5) {
+						int body = (int) getDegrees(Boss.get().getParts().get("body2").getLocation());
+						int entity = (int) 5
+								* (Math.round(getDegrees(Boss.get().getLook().getEntity().getLocation()) / 5));
+						if (body < entity) {
+							Boss.get().rotateRight();
+						}
+						if (body > entity) {
+							Boss.get().rotateLeft();
+						}
+						Boss.get().getNPC().faceLocation(m.getPlayer().getLocation());
 					}
-					if (body > entity) {
-						Boss.get().rotateLeft();
-					}
-					Boss.get().getNPC().faceLocation(m.getPlayer().getLocation());
-					if (!reached1 && round1) {
+					if (fire) {
 						t++;
 						fireBall(t, Boss.get().getParts().get("leftbutton").getEyeLocation(),
 								m.getPlayer().getLocation(), m,
@@ -81,27 +89,95 @@ public class Final {
 							destroyConsole(ds);
 						}
 					}
-					if (!hit) {
-						if (destroyed.isEmpty()) {
-							round1 = false;
-							reached1 = false;
-							spawnRound1(loc);
-							hit = true;
+					if (round == 1) {
+						if (!hit) {
+							if (destroyed.isEmpty()) {
+								t = 0;
+								fire = false;
+								spawnRound1(loc);
+								hit = true;
+							}
+						} else {
+							if (destroyed.size() == 1) {
+								t = 0;
+								fire = false;
+								round = 2;
+								hit = false;
+							}
 						}
-						if (destroyed.size() == 2) {
-							round1 = false;
-							reached1 = false;
-							round = 3;
-							m.getPlayer().sendMessage("thats it 4 now");
-							hit = true;
+					}
+					if (round == 2) {
+						if (!hit) {
+							if (destroyed.size() == 1) {
+								t = 0;
+								fire = false;
+								round = 2;
+								spawnRound2(loc);
+								hit = true;
+							}
+						} else {
+							if (destroyed.size() == 2) {
+								t = 0;
+								fire = false;
+								round = 3;
+								hit = false;
+							}
 						}
-					} else {
-						if (destroyed.size() == 1) {
-							round1 = false;
-							reached1 = false;
-							round = 2;
-							spawnRound2(loc);
-							hit = false;
+					}
+					if (round == 3) {
+						if (!hit) {
+							if (destroyed.size() == 2) {
+								t = 0;
+								fire = false;
+								round = 3;
+								spawnRound3(loc);
+								hit = true;
+							}
+						} else {
+							if (destroyed.size() == 3) {
+								t = 0;
+								fire = false;
+								round = 4;
+								hit = false;
+							}
+						}
+					}
+					if (round == 4) {
+						if (!hit) {
+							if (destroyed.size() == 3) {
+								t = 0;
+								fire = false;
+								round = 4;
+								spawnRound4(loc);
+								hit = true;
+							}
+						} else {
+							if (destroyed.size() == 4) {
+								t = 0;
+								fire = false;
+								round = 5;
+								hit = false;
+							}
+						}
+					}
+					if (round == 5) {
+						if (!hit) {
+							// if (destroyed.size() == 4) {
+							Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+								@Override
+								public void run() {
+									Boss.get().removeChair();
+									//Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity()
+										//	.setGliding(true);
+									//Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity().setAI(false);
+									Boss.get().getNPC().data().set(NPC.NAMEPLATE_VISIBLE_METADATA, false);
+									SimpleSitPlayer sp = new SimpleSitPlayer((Player) Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity());
+									sp.setLaying(true);
+									hit = true;
+								}
+							}, 20L);
+
+							// }
 						}
 					}
 				}
@@ -110,18 +186,17 @@ public class Final {
 			Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 60);
 			Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + "You really think you can beat me?! HAHAHA", 60);
 		}
+
 	}
 
-	public void setRoundOver(int i) {
-		if (i == 1) {
-			round1 = true;
-		}
+	public void setFire(boolean b) {
+		fire = b;
 	}
 
 	public int getRound() {
 		return round;
 	}
-	
+
 	public List<Location> getDestroyed() {
 		return destroyed;
 	}
@@ -147,11 +222,35 @@ public class Final {
 				Mob.get().spawnGuard(loc.clone().add(4, 0, 0).subtract(0, 0, 5));
 				Mob.get().spawnGuard(loc.clone().subtract(4, 0, 5));
 			}
-		}, 30L);
+		}, 60L);
+	}
+
+	public void spawnRound3(Location loc) {
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				Mob.get().spawnLits(loc.clone().add(4, 0, 5));
+				Mob.get().spawnLits(loc.clone().add(0, 0, 5).subtract(4, 0, 0));
+				Mob.get().spawnLits(loc.clone().add(4, 0, 0).subtract(0, 0, 5));
+				Mob.get().spawnLits(loc.clone().subtract(4, 0, 5));
+			}
+		}, 60L);
+	}
+
+	public void spawnRound4(Location loc) {
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				Mob.get().spawnT2000(loc.clone().add(4, 0, 5));
+				Mob.get().spawnT2000(loc.clone().add(0, 0, 5).subtract(4, 0, 0));
+				Mob.get().spawnT2000(loc.clone().add(4, 0, 0).subtract(0, 0, 5));
+				Mob.get().spawnT2000(loc.clone().subtract(4, 0, 5));
+			}
+		}, 60L);
 	}
 
 	public void fireBall(int i, Location from, Location to, Map m, Location from2, Location to2) {
-		if (!reached1) {
+		if (fire) {
 			Location l = null;
 			Location l2 = null;
 			Vector v = null;
@@ -173,14 +272,15 @@ public class Final {
 			if (i == 120) {
 				l = from.clone();
 				v = getDirection(l, to.add(0, 3, 0));
-				l.add(v.normalize().multiply(2));
+				l.add(v.normalize().multiply(3));
 				fb = from.getWorld().spawn(l.add(l.getDirection()), Fireball.class);
 				l2 = from2.clone();
 				v2 = getDirection(l2, to2.add(0, 3, 0));
-				l2.add(v2.normalize().multiply(2));
+				l2.add(v2.normalize().multiply(3));
 				fb2 = from2.getWorld().spawn(l2.add(l2.getDirection()), Fireball.class);
 				fbs.add(fb);
 				fbs.add(fb2);
+				once = false;
 			}
 			if (i > 120) {
 				for (Location console : m.getConsoles()) {
@@ -189,26 +289,27 @@ public class Final {
 							destroyed.add(console.clone().add(0.5, 0.5, 0.5));
 							m.message("A console has been destroyed!");
 						}
-						if (round == 2) {
-							hit = false;
-						} else {
-							hit = true;
-						}
 						check = true;
 					}
 				}
-				if (fb.isDead() || fb2.isDead()) {
-					if (!check) {
-						if (round == 2) {
-							hit = true;
-						} else {
-							hit = false;
-						}
-					}
-					reached1 = true;
-					this.t = 0;
-				}
 			}
+		}
+	}
+
+	public void exploded() {
+		if (!once) {
+			fbs.clear();
+			if (!check) {
+				hit = false;
+				MapManager.get().getMap("test").message("no hit!");
+			} else {
+				hit = true;
+				MapManager.get().getMap("test").message("hit!");
+				check = false;
+			}
+			t = 0;
+			fire = false;
+			once = true;
 		}
 	}
 
@@ -223,12 +324,11 @@ public class Final {
 			Bukkit.getServer().getScheduler().cancelTask(id);
 			destroyed.clear();
 			fbs.clear();
-			reached1 = false;
-			round1 = false;
+			fire = false;
 			check = false;
 			hit = false;
 			t = 0;
-			round = 1;
+			round = 5;
 			spawned = false;
 		}
 	}

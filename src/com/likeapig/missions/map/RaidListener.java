@@ -20,6 +20,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -82,11 +84,14 @@ public class RaidListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onFrameBreak(EntityDamageByEntityEvent e) {
+	public void onFrameBreak(HangingBreakEvent e) {
 		if (e.getEntity() instanceof ItemFrame) {
-			if (e.getDamager() instanceof Fireball) {
-				if (Final.get().getFbs().contains(e.getDamager())) {
-					e.setCancelled(true);
+			Map m = MapManager.get().getMap("test");
+			if (m != null) {
+				if (m.getStateName().equals("STARTED")) {
+					if (e.getCause().toString().equals("EXPLOSION")) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
@@ -120,6 +125,7 @@ public class RaidListener implements Listener {
 	public void onExplode(EntityExplodeEvent e) {
 		if (e.getEntity() instanceof Fireball) {
 			if (Final.get().getFbs().contains(e.getEntity())) {
+				Final.get().exploded();
 				e.setCancelled(true);
 				return;
 			}
@@ -420,8 +426,13 @@ public class RaidListener implements Listener {
 					e.setDamage(6);
 					if (!p.hasPotionEffect(PotionEffectType.SLOW)) {
 						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 90, 2));
-						p.sendMessage(ChatColor.RED + "You have been slowed by the Guard!");
 					}
+				}
+				if (m.getRound() == 5 && m.getRoundNPC(4).contains(npc)) {
+					if (p.getFireTicks() <= 0) {
+						p.setFireTicks(4 * 20);
+					}
+					e.setDamage(4);
 				}
 			}
 		}
