@@ -4,25 +4,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.utils.ParticleEffect;
+import com.likeapig.missions.utils.ParticleEffect.ParticleData;
 import com.likeapig.missions.utils.Titles;
 
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 import net.apcat.simplesit.SimpleSitPlayer;
 import net.citizensnpcs.api.npc.NPC;
+import net.minecraft.server.v1_12_R1.IteratorUtils;
 import net.minecraft.server.v1_12_R1.Packet;
 
 public class Final {
@@ -30,6 +40,8 @@ public class Final {
 	public static Final instance;
 	private boolean spawned = false;
 	private int id;
+	private int id2;
+	private int id3;
 	private int t = 0;
 	// public static boolean reached1 = false;
 	public static boolean fire = false;
@@ -37,15 +49,17 @@ public class Final {
 	Fireball fb2;
 	List<Fireball> fbs = new ArrayList<Fireball>();
 	public FurnitureLib ins = FurnitureLib.getInstance();
-	boolean d1 = false;
-	boolean d2 = false;
-	boolean d3 = false;
-	boolean d4 = false;
 	List<Location> destroyed = new ArrayList<Location>();
 	public static boolean hit = false;
 	public static boolean check = false;
+	boolean check2 = false;
 	public boolean once = false;
-	int round = 5;
+	int round = 1;
+	public static boolean isSitting = false;
+	private List<String> msgs = new ArrayList<String>();
+	public ItemStack potion;
+	private String title = ChatColor.DARK_RED + "" + ChatColor.BOLD + "SCIENTIST" + ChatColor.RESET + ""
+			+ ChatColor.GRAY + ": " + ChatColor.WHITE + "" + ChatColor.BOLD + "";
 
 	static {
 		instance = new Final();
@@ -55,8 +69,27 @@ public class Final {
 		return instance;
 	}
 
+	public Final() {
+		potion = new ItemStack(Material.POTION, 1, (byte) 0);
+		{
+			ItemMeta meta = potion.getItemMeta();
+			meta.setDisplayName(ChatColor.WHITE + "" + ChatColor.BOLD + "Mysterious Potion");
+			meta.addItemFlags(ItemFlag.values());
+			potion.setItemMeta(meta);
+			potion.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
+		}
+	}
+
+	public void setMsgs() {
+		msgs.add("OUCH, WHAT THE HELL!");
+		msgs.add("CAN YOU NOT?!");
+		msgs.add("I WAS SITTING THERE!! REEEEE");
+		msgs.add("MY CHAIR! NOOOO");
+	}
+
 	public void spawnBoss(Location loc, Map m) {
 		if (!spawned) {
+			setMsgs();
 			Boss.get().Chair(loc);
 			Boss.get().setNPC();
 			Boss.get().spawnLook();
@@ -64,7 +97,7 @@ public class Final {
 				@Override
 				public void run() {
 					Boss.get().look(m.getPlayer().getLocation());
-					if (round != 5) {
+					if (Boss.get().getParts().get("body2") != null) {
 						int body = (int) getDegrees(Boss.get().getParts().get("body2").getLocation());
 						int entity = (int) 5
 								* (Math.round(getDegrees(Boss.get().getLook().getEntity().getLocation()) / 5));
@@ -84,100 +117,131 @@ public class Final {
 						// fireBall2(t2, Boss.get().getParts().get("rightbutton").getEyeLocation(),
 						// m.getPlayer().getLocation(), m);
 					}
-					if (destroyed.size() != 0) {
-						for (Location ds : destroyed) {
-							destroyConsole(ds);
+					if (isSitting) {
+						if (!check) {
+							sit(loc, m);
+							check = true;
 						}
 					}
-					if (round == 1) {
-						if (!hit) {
-							if (destroyed.isEmpty()) {
-								t = 0;
-								fire = false;
-								spawnRound1(loc);
-								hit = true;
-							}
-						} else {
-							if (destroyed.size() == 1) {
-								t = 0;
-								fire = false;
-								round = 2;
-								hit = false;
+					if (!isSitting) {
+						if (destroyed.size() != 0) {
+							for (Location ds : destroyed) {
+								destroyConsole(ds);
 							}
 						}
-					}
-					if (round == 2) {
-						if (!hit) {
-							if (destroyed.size() == 1) {
-								t = 0;
-								fire = false;
-								round = 2;
-								spawnRound2(loc);
-								hit = true;
-							}
-						} else {
-							if (destroyed.size() == 2) {
-								t = 0;
-								fire = false;
-								round = 3;
-								hit = false;
-							}
-						}
-					}
-					if (round == 3) {
-						if (!hit) {
-							if (destroyed.size() == 2) {
-								t = 0;
-								fire = false;
-								round = 3;
-								spawnRound3(loc);
-								hit = true;
-							}
-						} else {
-							if (destroyed.size() == 3) {
-								t = 0;
-								fire = false;
-								round = 4;
-								hit = false;
-							}
-						}
-					}
-					if (round == 4) {
-						if (!hit) {
-							if (destroyed.size() == 3) {
-								t = 0;
-								fire = false;
-								round = 4;
-								spawnRound4(loc);
-								hit = true;
-							}
-						} else {
-							if (destroyed.size() == 4) {
-								t = 0;
-								fire = false;
-								round = 5;
-								hit = false;
-							}
-						}
-					}
-					if (round == 5) {
-						if (!hit) {
-							// if (destroyed.size() == 4) {
-							Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
-								@Override
-								public void run() {
-									Boss.get().removeChair();
-									//Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity()
-										//	.setGliding(true);
-									//Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity().setAI(false);
-									Boss.get().getNPC().data().set(NPC.NAMEPLATE_VISIBLE_METADATA, false);
-									SimpleSitPlayer sp = new SimpleSitPlayer((Player) Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity());
-									sp.setLaying(true);
+						if (round == 1) {
+							if (!hit) {
+								if (destroyed.isEmpty()) {
+									t = 0;
+									fire = false;
+									spawnRound1(loc);
 									hit = true;
 								}
-							}, 20L);
-
-							// }
+							} else {
+								if (destroyed.size() == 1) {
+									t = 0;
+									fire = false;
+									round = 2;
+									hit = false;
+									isSitting = true;
+								}
+							}
+						}
+						if (round == 2) {
+							if (!isSitting) {
+								if (!hit) {
+									if (destroyed.size() == 1) {
+										t = 0;
+										fire = false;
+										round = 2;
+										m.getPlayer().sendMessage(title + "You can't possibly defeat me!");
+										spawnRound2(loc);
+										hit = true;
+									}
+								} else {
+									if (destroyed.size() == 2) {
+										t = 0;
+										fire = false;
+										round = 3;
+										isSitting = true;
+										hit = false;
+									}
+								}
+							}
+						}
+						if (round == 3) {
+							if (!isSitting) {
+								if (!hit) {
+									if (destroyed.size() == 2) {
+										t = 0;
+										fire = false;
+										round = 3;
+										m.getPlayer().sendMessage(title + "Resistance is futile.");
+										spawnRound3(loc);
+										hit = true;
+									}
+								} else {
+									if (destroyed.size() == 3) {
+										t = 0;
+										fire = false;
+										round = 4;
+										isSitting = true;
+										hit = false;
+									}
+								}
+							}
+						}
+						if (round == 4) {
+							if (!isSitting) {
+								if (!hit) {
+									if (destroyed.size() == 3) {
+										t = 0;
+										fire = false;
+										round = 4;
+										m.getPlayer().sendMessage(title + "Your fate is already sealed.");
+										spawnRound4(loc);
+										hit = true;
+									}
+								} else {
+									if (destroyed.size() == 4) {
+										t = 0;
+										fire = false;
+										round = 5;
+										hit = false;
+									}
+								}
+							}
+						}
+						if (round == 5) {
+							SimpleSitPlayer sp = new SimpleSitPlayer(
+									(Player) Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity());
+							if (!hit) {
+								if (destroyed.size() == 4) {
+									Boss.get().removeChair();
+									Boss.get().getNPC().data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
+									Titles.get().addTitle(m.getPlayer(),
+											ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 90);
+									Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE
+											+ "I have rigged this place to BLOW UP! HAHA (cough) (cough)", 90);
+									m.getPlayer().getInventory().addItem(potion);
+									m.message("You picked up a mysterious potion!");
+									m.removeGlass();
+									hit = true;
+								}
+							} else {
+								if (!sp.isSitting()) {
+									Boss.get().getNPC().getEntity().teleport(m.getBossLoc(4).clone().add(1, 0, 0));
+									sp.setSitting(true);
+								} else {
+									setBlood();
+									if (m.getPlayer().isGliding()) {
+										if (!m.getPlayer().hasPotionEffect(PotionEffectType.JUMP)) {
+											m.setComplete(true);
+											m.removePlayer(m.getPlayer());
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -191,6 +255,58 @@ public class Final {
 
 	public void setFire(boolean b) {
 		fire = b;
+	}
+
+	public void setBlood() {
+		Location l = Boss.get().getNPC().getEntity().getLocation();
+		l.add(0, 1, 0);
+		id3 = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				if (Boss.get().getNPC().getEntity() != null) {
+					ParticleEffect.BLOCK_CRACK.display(new ParticleData(Material.REDSTONE_BLOCK, (byte) 0) {
+					}, 0.0f, 0.0f, 0.0f, 0.0f, 1, l, 5);
+				}
+			}
+		}, 0L, 60L);
+	}
+
+	public ItemStack getPotion() {
+		return potion;
+	}
+
+	public void sit(Location loc, Map m) {
+		Random r = new Random();
+		String msg = msgs.get(r.nextInt(msgs.size()));
+		SimpleSitPlayer sp = new SimpleSitPlayer(
+				(Player) Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity());
+		Boss.get().removeChair();
+		Boss.get().getNPC().getEntity().teleport(m.getBossLoc(4).clone().add(1, 0, 0));
+		sp.setSitting(true);
+		Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 100);
+		Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + msg, 100);
+		msgs.remove(msg);
+		id2 = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				if (Boss.get().getNPC().getEntity() != null) {
+					ParticleEffect.ANGRY_VILLAGER.display(Boss.get().getNPC().getEntity().getLocation().add(0, 2, 0),
+							0f, 0f, 0f, 0f, 2);
+				}
+			}
+		}, 0L, 20L);
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				sp.setSitting(false);
+				hit = false;
+				isSitting = false;
+				check = false;
+				Boss.get().Chair(loc);
+				Boss.get().getParts().get("body2").setPassenger(Boss.get().getNPC().getEntity());
+				Bukkit.getServer().getScheduler().cancelTask(id2);
+			}
+		}, 120L);
 	}
 
 	public int getRound() {
@@ -210,7 +326,7 @@ public class Final {
 				Mob.get().spawnRound1(loc.clone().add(4, 0, 0).subtract(0, 0, 5));
 				Mob.get().spawnRound1(loc.clone().subtract(4, 0, 5));
 			}
-		}, 60L);
+		}, 120L);
 	}
 
 	public void spawnRound2(Location loc) {
@@ -301,10 +417,8 @@ public class Final {
 			fbs.clear();
 			if (!check) {
 				hit = false;
-				MapManager.get().getMap("test").message("no hit!");
 			} else {
 				hit = true;
-				MapManager.get().getMap("test").message("hit!");
 				check = false;
 			}
 			t = 0;
@@ -321,14 +435,19 @@ public class Final {
 		if (spawned) {
 			Boss.get().removeChair();
 			Boss.get().removeNPC();
+			Bukkit.getServer().getScheduler().cancelTask(id3);
+			Bukkit.getServer().getScheduler().cancelTask(id2);
 			Bukkit.getServer().getScheduler().cancelTask(id);
+			msgs.clear();
 			destroyed.clear();
 			fbs.clear();
 			fire = false;
 			check = false;
+			check2 = false;
+			isSitting = false;
 			hit = false;
 			t = 0;
-			round = 5;
+			round = 1;
 			spawned = false;
 		}
 	}

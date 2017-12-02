@@ -1,34 +1,26 @@
 package com.likeapig.missions.map;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Skull;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Dye;
-import org.bukkit.util.Vector;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
@@ -38,6 +30,7 @@ import com.likeapig.missions.utils.LocationUtils;
 import com.likeapig.missions.utils.ParticleEffect;
 import com.likeapig.missions.utils.Titles;
 
+import main.RollbackAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -109,14 +102,17 @@ public class Map {
 	private boolean first;
 	private boolean second;
 	private boolean third;
+	private boolean complete;
 	private int i;
 	private int id = 0;
 	private int t = 0;
 	private int t2 = 0;
 	private int t3 = 0;
 	private int t4 = 0;
-	private HashMap<Location, Block> backup;
 	NPCRegistry registry;
+	private List<Location> glasses;
+	private List<Location> barriers;
+	private List<Location> trapdoor;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
@@ -141,7 +137,6 @@ public class Map {
 		eighty = new ArrayList<String>();
 		heads = new ArrayList<Location>();
 		consoles = new ArrayList<Location>();
-		backup = new HashMap<Location, Block>();
 		fifteen.add(Material.IRON_INGOT.toString());
 		fifteen.add(Material.IRON_HELMET.toString());
 		fifteen.add(Material.IRON_CHESTPLATE.toString());
@@ -153,6 +148,7 @@ public class Map {
 		eighty.add(Material.AIR.toString());
 		this.state = MapState.STOPPED;
 		this.name = s;
+		complete = false;
 		first = true;
 		second = true;
 		third = false;
@@ -241,6 +237,11 @@ public class Map {
 			consoles.add(console3);
 			consoles.add(console4);
 		}
+		glasses = new ArrayList<Location>(
+				RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.GLASS));
+		barriers = new ArrayList<Location>(
+				RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.BARRIER));
+		trapdoor = new ArrayList<Location>(RollbackAPI.getBlocksOfTypeInRegion(spawn.getWorld(), "robot", Material.TRAP_DOOR));
 		saveToConfig();
 		this.checkState();
 	}
@@ -282,7 +283,8 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
+			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
+			ci.setItem(slot, is);
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -291,8 +293,10 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
-			ci.setItem(23, new ItemStack(Material.getMaterial(s2.toUpperCase())));
+			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
+			ItemStack is2 = new ItemStack(Material.getMaterial(s2.toUpperCase()));
+			ci.setItem(slot, is);
+			ci.setItem(23, is2);
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -301,8 +305,10 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(16, new ItemStack(Material.getMaterial(s.toUpperCase())));
-			ci.setItem(slot, new ItemStack(Material.getMaterial(s2.toUpperCase())));
+			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
+			ItemStack is2 = new ItemStack(Material.getMaterial(s2.toUpperCase()));
+			ci.setItem(16, is);
+			ci.setItem(slot, is2);
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -311,8 +317,9 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
+			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
 			ci.setItem(3, new ItemStack(Material.REDSTONE));
-			ci.setItem(slot, new ItemStack(Material.getMaterial(s.toUpperCase())));
+			ci.setItem(slot, is);
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -321,8 +328,10 @@ public class Map {
 			Block b = loc.getBlock();
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
-			ci.setItem(5, new ItemStack(Material.getMaterial(s.toUpperCase())));
-			ci.setItem(slot, new ItemStack(Material.getMaterial(s2.toUpperCase())));
+			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
+			ItemStack is2 = new ItemStack(Material.getMaterial(s2.toUpperCase()));
+			ci.setItem(5, is);
+			ci.setItem(slot, is2);
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -808,9 +817,9 @@ public class Map {
 		loadChests();
 		skinHeads();
 		this.setState(MapState.STARTED);
-		getPlayer().teleport(floor4);
-		finalBoss();
 		Lazer.get();
+		Final.get();
+		firstRound();
 	}
 
 	public void firstRound() {
@@ -874,11 +883,13 @@ public class Map {
 	}
 
 	public void spawnGuards() {
-		message("Guards have been deployed.");
-		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 0));
-		Mob.get().spawnGuard(bossLoc2.clone().add(0, 0, 2));
-		Mob.get().spawnGuard(bossLoc2.clone().add(1, 0, 2));
-		Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 1));
+		if (getRound() != 5) {
+			message("Guards have been deployed.");
+			Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 0));
+			Mob.get().spawnGuard(bossLoc2.clone().add(0, 0, 2));
+			Mob.get().spawnGuard(bossLoc2.clone().add(1, 0, 2));
+			Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 1));
+		}
 	}
 
 	public void spawnRobots() {
@@ -922,7 +933,32 @@ public class Map {
 			}
 		}
 	}
-	
+
+	public void removeGlass() {
+		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+			@Override
+			public void run() {
+				for (Location loc : glasses) {
+					Block glass = loc.getBlock();
+					glass.setType(Material.AIR);
+					glass.getState().update();
+				}
+				for (Location loc : barriers) {
+					ParticleEffect.EXPLOSION_HUGE.display(loc, 0.0f, 0.0f, 0.0f, 0, 2);
+					loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+				}
+			}
+		}, 90L);
+	}
+
+	public void restoreGlass() {
+		for (Location loc : glasses) {
+			Block glass = loc.getBlock();
+			glass.setType(Material.GLASS);
+			glass.getState().update();
+		}
+	}
+
 	public List<Location> getConsoles() {
 		return consoles;
 	}
@@ -976,11 +1012,7 @@ public class Map {
 				p.getInventory().remove(card2);
 			}
 			Map.data = new Data(p, this);
-			p.teleport(this.spawn);
 			this.message(ChatColor.GREEN + p.getName() + " joined the Mission!");
-			if (Map.data != null) {
-				this.start();
-			}
 		}
 	}
 
@@ -996,8 +1028,16 @@ public class Map {
 			if (p.getInventory().contains(card3)) {
 				p.getInventory().remove(card3);
 			}
+			if (p.getInventory().contains(Final.get().getPotion())) {
+				p.getInventory().remove(Final.get().getPotion());
+			}
+			if (p.isGliding()) {
+				p.setGliding(false);
+			}
+			if (!complete) {
+				data.restore();
+			}
 			Final.get().removeBoss();
-			Map.data.restore();
 			Map.data = null;
 			if (Map.data == null) {
 				this.stop();
@@ -1076,9 +1116,11 @@ public class Map {
 		if (Lazer.class != null) {
 			Lazer.get().reset();
 		}
+		complete = false;
 		first = true;
 		second = true;
 		third = false;
+		restoreGlass();
 		Final.get().removeBoss();
 		setFloor(1);
 		setRound(1);
@@ -1150,6 +1192,14 @@ public class Map {
 
 	public List<Location> getChests() {
 		return chests;
+	}
+	
+	public void setComplete(boolean b) {
+		complete = b;
+	}
+	
+	public boolean isComplete() {
+		return complete;
 	}
 
 	public Location getConsole(int i) {
@@ -1250,6 +1300,10 @@ public class Map {
 		} else {
 			return null;
 		}
+	}
+	
+	public List<Location> getTrapDoor() {
+		return trapdoor;
 	}
 
 	public void setChest(int i, Location l) {

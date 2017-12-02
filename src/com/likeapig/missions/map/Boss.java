@@ -8,8 +8,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -31,6 +33,7 @@ public class Boss {
 	private double sinus = 0.08715574274765817;
 	private double cosinus = 0.9961946980917455;
 	private float degrees = 5;
+	private boolean min = false;
 
 	private HashMap<String, ArmorStand> parts = new HashMap<>();
 	Location chairLoc;
@@ -63,12 +66,18 @@ public class Boss {
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "scientist");
 		npc.addTrait(SentinelTrait.class);
 		npc.spawn(getParts().get("body2").getLocation());
-		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
+		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(500);
+			entity.setHealth(500);
+			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(new ItemStack(Material.REDSTONE_TORCH_ON));
+		}
 		getParts().get("body2").setPassenger(npc.getEntity());
 	}
 
 	public void spawnLook() {
 		npcLook = registry.createNPC(EntityType.PLAYER, "Robot");
+		npcLook.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
 		npcLook.data().set(NPC.COLLIDABLE_METADATA, false);
 		npcLook.data().set(NPC.TARGETABLE_METADATA, false);
 		npcLook.addTrait(SentinelTrait.class);
@@ -122,6 +131,30 @@ public class Boss {
 			point = point.add(origin);
 			point.setYaw(point.getYaw() + degrees);
 			point.setPitch(point.getPitch());
+			entity.teleport(point);
+			tpSeat(entity, point);
+		}
+		return vec;
+	}
+
+	public Location hover(Player p) {
+		Location origin = getChairLoc();
+		Location vec = null;
+		for (ArmorStand entity : getParts().values()) {
+			Location point = entity.getLocation();
+			Location clone = origin.clone();
+			clone = clone.subtract(origin);
+			point = point.subtract(origin);
+			double y = point.getY();
+			if (y <= clone.getY() - 2 && y <= clone.getY() + 2) {
+				y = point.getY() + 0.2;
+			} else {
+				y = point.getY() - 0.2;
+			}
+			p.sendMessage(Double.toString(y) + ", " + Double.toString(clone.getY() + 2));
+			point.setY(y);
+			point = point.add(origin);
+			clone.add(origin);
 			entity.teleport(point);
 			tpSeat(entity, point);
 		}

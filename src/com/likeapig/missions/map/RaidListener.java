@@ -3,8 +3,10 @@ package com.likeapig.missions.map;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.logging.log4j.core.appender.AsyncAppender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -23,12 +25,15 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.commands.MessageManager;
@@ -78,6 +83,31 @@ public class RaidListener implements Listener {
 					if (block.getType() == Material.SPRUCE_DOOR) {
 						e.setCancelled(true);
 					}
+				}
+			}
+			if (!m.getStateName().equals("STARTED")) {
+				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					Block block = e.getClickedBlock();
+					if (m.getTrapDoor().contains(block.getLocation())) {
+						m.start();
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onConsume(PlayerItemConsumeEvent e) {
+		Player p = e.getPlayer();
+		Map m = MapManager.get().getMap(p);
+		if (m != null) {
+			if (m.getRound() == 5) {
+				if (e.getItem().equals(Final.get().getPotion())) {
+					p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 400, 1));
+					p.setGliding(true);
+					Location l = p.getLocation();
+					l.add(l.getDirection());
+					p.setVelocity(l.getDirection());
 				}
 			}
 		}
@@ -346,7 +376,7 @@ public class RaidListener implements Listener {
 									if (Lazer.get().isDead()) {
 										p.teleport(map.getFloor(4));
 										map.setFloor(4);
-										p.sendMessage("thats it so far :)");
+										map.finalBoss();
 										return;
 									} else {
 										MessageManager.get().message(p, "You need to secure the redstone!",
@@ -380,10 +410,13 @@ public class RaidListener implements Listener {
 	@EventHandler
 	public void onNPCHit(NPCDamageByEntityEvent e) {
 		NPC npc = e.getNPC();
-		if (e.getDamager() instanceof Player || e.getDamager() instanceof Arrow) {
+		if (e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getCause() == DamageCause.MAGIC) {
 			if (npc.hasTrait(MiniTrait.class)) {
 				e.setCancelled(true);
 			}
+		}
+		if (npc.equals(Boss.get().getLook())) {
+			e.setCancelled(true);
 		}
 	}
 
@@ -458,6 +491,10 @@ public class RaidListener implements Listener {
 			return;
 		}
 		final Player pl = (Player) e.getEntity();
+		Map m = MapManager.get().getMap(pl);
+		if (m == null) {
+			return;
+		}
 		if (pl.isGliding()) {
 			e.setCancelled(true);
 		}

@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/ProtocolLib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/FurnitureLib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/SimpleSit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/kokpa/Documents/dTools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
