@@ -43,6 +43,7 @@ public class Final {
 	private int id2;
 	private int id3;
 	private int t = 0;
+	private int t2 = 0;
 	// public static boolean reached1 = false;
 	public static boolean fire = false;
 	Fireball fb;
@@ -101,6 +102,11 @@ public class Final {
 						int body = (int) getDegrees(Boss.get().getParts().get("body2").getLocation());
 						int entity = (int) 5
 								* (Math.round(getDegrees(Boss.get().getLook().getEntity().getLocation()) / 5));
+						t2++;
+						if (t2 >= 24) {
+							t2 = 0;
+						}
+						Boss.get().hover(t2);
 						if (body < entity) {
 							Boss.get().rotateRight();
 						}

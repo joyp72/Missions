@@ -20,6 +20,7 @@ public class Test extends Commands {
 
 	int i = 0;
 	int id;
+	int t;
 	public FurnitureLib ins = FurnitureLib.getInstance();
 
 	@Override
@@ -31,7 +32,11 @@ public class Test extends Commands {
 			id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
 				@Override
 				public void run() {
-					Boss.get().hover(p);
+					t++;
+					if (t >= 24) {
+						t = 0;
+					}
+					Boss.get().hover(t);
 				}
 			}, 0L, 0L);
 		} else {

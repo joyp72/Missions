@@ -137,7 +137,7 @@ public class Boss {
 		return vec;
 	}
 
-	public Location hover(Player p) {
+	public Location hover(int i) {
 		Location origin = getChairLoc();
 		Location vec = null;
 		for (ArmorStand entity : getParts().values()) {
@@ -146,12 +146,12 @@ public class Boss {
 			clone = clone.subtract(origin);
 			point = point.subtract(origin);
 			double y = point.getY();
-			if (y <= clone.getY() - 2 && y <= clone.getY() + 2) {
-				y = point.getY() + 0.2;
-			} else {
-				y = point.getY() - 0.2;
+			if (i >= 0 && i < 12) {
+				y = point.getY() - 0.01;
 			}
-			p.sendMessage(Double.toString(y) + ", " + Double.toString(clone.getY() + 2));
+			if (i >= 12 && i <= 24) {
+				y = point.getY() + 0.01;
+			}
 			point.setY(y);
 			point = point.add(origin);
 			clone.add(origin);
