@@ -288,6 +288,7 @@ public class Final {
 				(Player) Boss.get().getNPC().getTrait(SentinelTrait.class).getLivingEntity());
 		Boss.get().removeChair();
 		Boss.get().getNPC().getEntity().teleport(m.getBossLoc(4).clone().add(1, 0, 0));
+		Boss.get().getNPC().data().set(NPC.DEFAULT_PROTECTED_METADATA, false);
 		sp.setSitting(true);
 		Titles.get().addTitle(m.getPlayer(), ChatColor.RED + "" + ChatColor.BOLD + "MAD SCIENTIST", 100);
 		Titles.get().addSubTitle(m.getPlayer(), ChatColor.WHITE + msg, 100);
@@ -308,6 +309,7 @@ public class Final {
 				hit = false;
 				isSitting = false;
 				check = false;
+				Boss.get().getNPC().data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
 				Boss.get().Chair(loc);
 				Boss.get().getParts().get("body2").setPassenger(Boss.get().getNPC().getEntity());
 				Bukkit.getServer().getScheduler().cancelTask(id2);
@@ -407,7 +409,7 @@ public class Final {
 			if (i > 120) {
 				for (Location console : m.getConsoles()) {
 					if (fb.getLocation().distance(console) <= 4) {
-						if (!destroyed.contains(console)) {
+						if (!destroyed.contains(console.clone().add(0.5, 0.5, 0.5))) {
 							destroyed.add(console.clone().add(0.5, 0.5, 0.5));
 							m.message("A console has been destroyed!");
 						}

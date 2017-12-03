@@ -28,7 +28,7 @@ public class Main extends JavaPlugin {
 
 	public void onEnable() {
 		Main.instance = this;
-		this.getLogger().info("Raid Enabled!");
+		this.getLogger().info("Mission Enabled!");
 		ProtocolLibrary.getProtocolManager().addPacketListener(
 				new Movement(this, ListenerPriority.NORMAL, new PacketType[] { PacketType.Play.Client.STEER_VEHICLE }));
 		CommandsManager.get().setup();
