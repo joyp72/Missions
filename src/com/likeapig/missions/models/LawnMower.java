@@ -1,16 +1,33 @@
 package com.likeapig.missions.models;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.Entity;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketEvent;
+
+import de.Ste3et_C0st.FurnitureLib.Crafting.Project;
+import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
+import de.Ste3et_C0st.FurnitureLib.main.ObjectID;
+import de.Ste3et_C0st.FurnitureLib.main.Type.SQLAction;
+import de.Ste3et_C0st.FurnitureLib.main.entity.fEntity;
+import net.minecraft.server.v1_12_R1.PacketPlayInSteerVehicle;
 
 public class LawnMower {
 
 	public static LawnMower instance;
+	private FurnitureLib lib = FurnitureLib.getInstance();
+	private Location mowerLoc;
+	Project mower;
+	List<ObjectID> ids;
+	private double sinus = 0.08715574274765817;
+	private double cosinus = 0.9961946980917455;
+	private float degrees = 5;
 
 	static {
 		instance = new LawnMower();
@@ -20,90 +37,122 @@ public class LawnMower {
 		return instance;
 	}
 
-	private HashMap<String, ArmorStand> parts = new HashMap<>();
-
-	public HashMap<String, ArmorStand> getParts() {
-		return parts;
+	public List<ObjectID> getID() {
+		return ids;
 	}
 
-	public ArmorStand NewAS(Location loc, boolean mini) {
-		loc.setYaw(0);
-		ArmorStand as = loc.getWorld().spawn(loc, ArmorStand.class);
-
-		as.setVisible(false);
-		as.setArms(true);
-		as.setBasePlate(false);
-		as.setInvulnerable(true);
-		as.setGravity(true);
-		as.setCanPickupItems(false);
-		as.setSmall(mini);
-		as.setCollidable(false);
-
-		return as;
+	public void mower(Location loc) {
+		mower = lib.getFurnitureManager().getProject("sleigh");
+		lib.spawn(mower, loc);
+		mowerLoc = loc;
+		ids = getNearbyProject(mowerLoc, mower.getName(), 2);
 	}
 
-	public void setPassanger(Player p) {
-		parts.get("seat").setPassenger(p);
-	}
-
-	public void spawnMower(Location loc, Player pl) {
-
-		Location l = loc.clone();
-		Location bl = l.subtract(0, 1.37, 0);
-
-		ArmorStand body1 = NewAS(bl, false);
-		body1.setHelmet(new ItemStack(Material.BRICK_STAIRS, 1, (byte) 14));
-
-		ArmorStand body2 = NewAS(bl.clone().add(0.62, 0, 0), false);// 0.465
-		body2.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body3 = NewAS(bl.clone().subtract(0.62, 0, 0), false);// 0.465
-		body3.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body4 = NewAS(bl.clone().add(0, 0, 0.62).subtract(0, 0.31, 0), false);
-		body4.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body5 = NewAS(bl.clone().add(0.465, 0, 0.62).subtract(0, 0.465, 0), false);
-		body5.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body6 = NewAS(bl.clone().subtract(0.465, 0.465, 0).add(0, 0, 0.62), false);
-		body6.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body7 = NewAS(bl.clone().add(0, 0.31, 1.24), false);
-		body7.setHelmet(new ItemStack(Material.CONCRETE, 1, (byte) 14));
-
-		ArmorStand body8 = NewAS(bl.clone().add(0, 1, 1.4), true);
-		body8.setHelmet(new ItemStack(Material.THIN_GLASS));
-
-		ArmorStand body9 = NewAS(bl.clone().add(0.02, 0, 1.2).subtract(0, 0.19, 0), false);
-		// ArmorStand body9 = NewAS(bl.clone().add(0, 0.8, 1.1), true);
-		body9.setHelmet(new ItemStack(Material.RECORD_11));
-
-		ArmorStand seat = NewAS(bl, false);
-		seat.setPassenger(pl);
-		seat.setGlowing(true);
-
-		parts.put("body1", body1);
-		parts.put("body2", body2);
-		parts.put("body3", body3);
-		parts.put("body4", body4);
-		parts.put("body5", body5);
-		parts.put("body6", body6);
-		parts.put("body7", body7);
-		parts.put("body8", body8);
-		parts.put("body9", body9);
-		parts.put("seat", seat);
-	}
-
-	public void removeMower() {
-		if (parts != null) {
-			if (!parts.isEmpty()) {
-				for (ArmorStand as : parts.values()) {
-					as.remove();
-				}
-				parts.clear();
-			}
+	public void remove() {
+		for (ObjectID id : getNearbyProject(mowerLoc, mower.getName(), 2)) {
+			id.remove(false);
 		}
 	}
 
+	public Project getMower() {
+		return mower;
+	}
+
+	public Location rotateRight() {
+		Location origin = mowerLoc;
+		Location vec = null;
+		for (ObjectID id : ids) {
+			for (fEntity entity : id.getPacketList()) {
+				Location point = entity.getLocation();
+				point = point.subtract(origin);
+				double x = point.getX() * cosinus - point.getZ() * sinus;
+				double y = point.getZ() * cosinus + point.getX() * sinus;
+				point.setX(x);
+				point.setZ(y);
+				point = point.add(origin);
+				point.setYaw(point.getYaw() + degrees);
+				point.setPitch(point.getPitch());
+				entity.teleport(point);
+			}
+		}
+		return vec;
+	}
+
+	public Location rotateLeft() {
+		Location origin = mowerLoc;
+		Location vec = null;
+		for (ObjectID id : ids) {
+			for (fEntity entity : id.getPacketList()) {
+				Location point = entity.getLocation();
+				point = point.subtract(origin);
+				double x = point.getX() * cosinus + point.getZ() * sinus;
+				double y = point.getZ() * cosinus - point.getX() * sinus;
+				point.setX(x);
+				point.setZ(y);
+				point = point.add(origin);
+				point.setYaw(point.getYaw() - degrees);
+				point.setPitch(point.getPitch());
+				entity.teleport(point);
+			}
+		}
+		return vec;
+	}
+
+	public Location forward() {
+		Location origin = mowerLoc;
+		Location vec = null;
+		for (ObjectID id : ids) {
+			for (fEntity entity : id.getPacketList()) {
+				Location point = entity.getLocation();
+				point = point.subtract(origin);
+				double x = point.getX() * cosinus + point.getZ() * sinus;
+				double y = point.getZ() * cosinus - point.getX() * sinus;
+				point.setX(x);
+				point.setZ(y);
+				point = point.add(origin);
+				point.setPitch(point.getPitch());
+				((Entity) entity).setVelocity(entity.getLocation().getDirection().normalize().multiply(0.2).setY(-2));
+			}
+		}
+		return vec;
+	}
+	
+	public Location backward() {
+		Location origin = mowerLoc;
+		Location vec = null;
+		for (ObjectID id : ids) {
+			for (fEntity entity : id.getPacketList()) {
+				Location point = entity.getLocation();
+				point = point.subtract(origin);
+				double x = point.getX() * cosinus + point.getZ() * sinus;
+				double y = point.getZ() * cosinus - point.getX() * sinus;
+				point.setX(x);
+				point.setZ(y);
+				point = point.add(origin);
+				point.setPitch(point.getPitch());
+				((Entity) entity).setVelocity(entity.getLocation().getDirection().normalize().multiply(-0.2).setY(-2));
+			}
+		}
+		return vec;
+	}
+
+	public Location getMowerLoc() {
+		return mowerLoc;
+	}
+
+	public static List<ObjectID> getNearbyProject(Location l, String str, int radius) {
+		List<ObjectID> idList = new ArrayList<ObjectID>();
+		for (ObjectID id : FurnitureLib.getInstance().getFurnitureManager().getObjectList()) {
+			if (id.getSQLAction().equals(SQLAction.REMOVE))
+				continue;
+			if (id.getProject().startsWith(str)) {
+				if (id.getStartLocation().getWorld().equals(l.getWorld())) {
+					if (id.getStartLocation().distance(l) <= radius)
+						idList.add(id);
+
+				}
+			}
+		}
+		return idList;
+	}
 }

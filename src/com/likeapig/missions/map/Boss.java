@@ -62,7 +62,7 @@ public class Boss {
 	}
 
 	public void setNPC() {
-		npc = this.registry.createNPC(EntityType.PLAYER, "§4§lSCIENTIST");
+		npc = this.registry.createNPC(EntityType.PLAYER, "§4§lDr. Merlan Stein");
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "scientist");
 		npc.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
 		npc.addTrait(SentinelTrait.class);

@@ -472,19 +472,6 @@ public class RaidListener implements Listener {
 	}
 
 	@EventHandler
-	public void onInteract(PlayerInteractAtEntityEvent e) {
-		if (e.getRightClicked() instanceof ArmorStand) {
-			if (Boss.get().getParts().containsValue(e.getRightClicked())) {
-				e.setCancelled(true);
-			}
-			if (LawnMower.get().getParts().containsValue(e.getRightClicked())) {
-				e.setCancelled(true);
-				LawnMower.get().setPassanger(e.getPlayer());
-			}
-		}
-	}
-
-	@EventHandler
 	public void onPlayerGlide(final EntityToggleGlideEvent e) {
 		final Entity entity = e.getEntity();
 		if (!(entity instanceof Player)) {

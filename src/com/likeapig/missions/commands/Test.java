@@ -1,17 +1,16 @@
 package com.likeapig.missions.commands;
 
-import org.bukkit.Bukkit;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftStructureBlock;
 import org.bukkit.entity.Player;
 
-import com.likeapig.missions.Main;
-import com.likeapig.missions.map.Boss;
-import com.likeapig.missions.map.Final;
-import com.likeapig.missions.map.Map;
-import com.likeapig.missions.map.MapManager;
-
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
-import net.apcat.simplesit.SimpleSit;
-import net.apcat.simplesit.SimpleSitPlayer;
+import main.RollbackAPI;
 
 public class Test extends Commands {
 	public Test() {
@@ -22,27 +21,17 @@ public class Test extends Commands {
 	int id;
 	int t;
 	public FurnitureLib ins = FurnitureLib.getInstance();
+	private List<Location> blocks;
 
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
-		if (i == 0) {
-			i++;
-			Boss.get().Chair(p.getLocation());
-			id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
-				@Override
-				public void run() {
-					t++;
-					if (t >= 24) {
-						t = 0;
-					}
-					Boss.get().hover(t);
-				}
-			}, 0L, 0L);
-		} else {
-			Bukkit.getServer().getScheduler().cancelTask(id);
-			Boss.get().removeChair();
-			i = 0;
+		blocks = new ArrayList<Location>(
+				RollbackAPI.getBlocksOfTypeInRegion(p.getWorld(), "intro", Material.STRUCTURE_BLOCK));
+		for (Location loc : blocks) {
+			Block b = loc.getBlock();
+			CraftStructureBlock sb = (CraftStructureBlock) b.getState();
+			p.sendMessage(sb.getSnapshotNBT().getString("metadata"));
 		}
 	}
 }
