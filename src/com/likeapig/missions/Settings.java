@@ -82,6 +82,10 @@ public class Settings {
 		return this.mapConfig.getConfigurationSection("maps");
 	}
 
+	public ConfigurationSection getIntroConfigSection() {
+		return mapConfig.getConfigurationSection("intros");
+	}
+
 	public ConfigurationSection getLootConfigSection() {
 		return this.lootConfig.getConfigurationSection("loot");
 	}

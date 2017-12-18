@@ -34,7 +34,7 @@ public class Intro {
 
 	public void saveToConfig() {
 		if (spawn != null) {
-			Settings.get().set("intros" + getName() + ".spawn", LocationUtils.locationToString(spawn));
+			Settings.get().set("intros." + getName() + ".spawn", LocationUtils.locationToString(spawn));
 		}
 	}
 
@@ -43,18 +43,23 @@ public class Intro {
 		if (s.get("intros." + getName() + ".spawn") != null) {
 			String s2 = s.get("intros." + getName() + ".spawn");
 			spawn = LocationUtils.stringToLocation(s2);
-			spawn.setY(0);
+			spawn.setYaw(0);
 		}
 	}
 
-	public void stop() {
+	public void start() {
+		getPlayer().teleport(spawn);
+	}
 
+	public void stop() {
+		setState(IntroState.WAITING);
 	}
 
 	public void addPlayer(Player p) {
-		if (containsPlayer(p) && state.canJoin()) {
+		if (!containsPlayer(p) && state.canJoin()) {
 			data = new IntroData(p, this);
 			message("You entered the Intro.");
+			start();
 		}
 	}
 
@@ -62,7 +67,7 @@ public class Intro {
 		if (containsPlayer(p)) {
 			data.restore();
 			data = null;
-			p.sendmes
+			MessageManager.get().message(p, "You quit the Intro.");
 			stop();
 		}
 	}
@@ -91,6 +96,10 @@ public class Intro {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getStateName() {
+		return state.getName();
 	}
 
 	public boolean containsPlayer(Player p) {

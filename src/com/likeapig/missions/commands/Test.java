@@ -9,6 +9,9 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftStructureBlock;
 import org.bukkit.entity.Player;
 
+import com.likeapig.missions.intro.Intro;
+import com.likeapig.missions.intro.IntroManager;
+
 import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 import main.RollbackAPI;
 
@@ -26,12 +29,22 @@ public class Test extends Commands {
 	@Override
 	public void onCommand(final Player sender, final String[] args) {
 		Player p = sender;
-		blocks = new ArrayList<Location>(
-				RollbackAPI.getBlocksOfTypeInRegion(p.getWorld(), "intro", Material.STRUCTURE_BLOCK));
-		for (Location loc : blocks) {
-			Block b = loc.getBlock();
-			CraftStructureBlock sb = (CraftStructureBlock) b.getState();
-			p.sendMessage(sb.getSnapshotNBT().getString("metadata"));
+		for (Intro i : IntroManager.get().getIntros()) {
+			p.sendMessage(i.getName() + " " + i.getStateName());
 		}
+		
+		
+		
+		
+		
+		
+		// blocks = new ArrayList<Location>(
+		// RollbackAPI.getBlocksOfTypeInRegion(p.getWorld(), "intro",
+		// Material.STRUCTURE_BLOCK));
+		// for (Location loc : blocks) {
+		// Block b = loc.getBlock();
+		// CraftStructureBlock sb = (CraftStructureBlock) b.getState();
+		// p.sendMessage(sb.getSnapshotNBT().getString("metadata"));
+		// }
 	}
 }

@@ -34,7 +34,7 @@ public class IntroManager {
 	public void setupIntros() {
 		intros.clear();
 		if (Settings.get().get("intros") != null) {
-			for (String s : Settings.get().getConfigSection().getKeys(false)) {
+			for (String s : Settings.get().getIntroConfigSection().getKeys(false)) {
 				try {
 					registerIntro(s);
 				} catch (Exception ex) {

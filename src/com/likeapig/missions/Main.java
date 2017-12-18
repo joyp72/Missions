@@ -7,6 +7,8 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.likeapig.missions.commands.CommandsManager;
+import com.likeapig.missions.intro.Intro;
+import com.likeapig.missions.intro.IntroManager;
 import com.likeapig.missions.map.Boss;
 import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
@@ -29,12 +31,14 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		Main.instance = this;
 		this.getLogger().info("Mission Enabled!");
-		//ProtocolLibrary.getProtocolManager().addPacketListener(
-			//	new Movement(this, ListenerPriority.NORMAL, new PacketType[] { PacketType.Play.Client.STEER_VEHICLE }));
+		// ProtocolLibrary.getProtocolManager().addPacketListener(
+		// new Movement(this, ListenerPriority.NORMAL, new PacketType[] {
+		// PacketType.Play.Client.STEER_VEHICLE }));
 		CommandsManager.get().setup();
 		RaidListener.get().setup();
 		Settings.get().setup((Plugin) this);
 		MapManager.get().setupMaps();
+		IntroManager.get().setupIntros();
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));
@@ -44,10 +48,14 @@ public class Main extends JavaPlugin {
 	}
 
 	public void onDisable() {
-		Map m = MapManager.get().getMap("test");
-		if (m != null) {
+		for (Map m : MapManager.get().getMaps()) {
 			if (m.getStateName().equals("STARTED")) {
 				m.kickPlayer(m.getPlayer());
+			}
+		}
+		for (Intro i : IntroManager.get().getIntros()) {
+			if (i.getStateName().equals("STARTED")) {
+				i.removePlayer(i.getPlayer());
 			}
 		}
 		this.getLogger().info("Disabled!");
