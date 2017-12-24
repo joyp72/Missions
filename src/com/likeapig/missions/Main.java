@@ -8,7 +8,9 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.likeapig.missions.commands.CommandsManager;
 import com.likeapig.missions.intro.Intro;
+import com.likeapig.missions.intro.IntroListener;
 import com.likeapig.missions.intro.IntroManager;
+import com.likeapig.missions.intro.IntroTrait;
 import com.likeapig.missions.map.Boss;
 import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
@@ -36,6 +38,7 @@ public class Main extends JavaPlugin {
 		// PacketType.Play.Client.STEER_VEHICLE }));
 		CommandsManager.get().setup();
 		RaidListener.get().setup();
+		IntroListener.get().setup();
 		Settings.get().setup((Plugin) this);
 		MapManager.get().setupMaps();
 		IntroManager.get().setupIntros();
@@ -43,6 +46,8 @@ public class Main extends JavaPlugin {
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MiniTrait.class));
+		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(IntroTrait.class));
+		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(IntroTrait.class));
 		new Boss();
 		new LawnMower();
 	}
