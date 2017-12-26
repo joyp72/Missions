@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
@@ -30,6 +32,24 @@ public class IntroListener implements Listener {
 		Intro i = IntroManager.get().getIntro(p);
 		if (i != null) {
 			i.removePlayer(p);
+		}
+	}
+
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		Intro i = IntroManager.get().getIntro(p);
+		if (i != null) {
+			i.handleMoveEvent(e);
+		}
+	}
+	
+	@EventHandler
+	public void onInteract(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
+		Intro i = IntroManager.get().getIntro(p);
+		if (i != null) {
+			i.handleInteract(e);
 		}
 	}
 

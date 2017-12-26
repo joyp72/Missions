@@ -33,10 +33,14 @@ public class Test extends Commands {
 		for (Location loc : blocks) {
 			Block b = loc.getBlock();
 			CraftStructureBlock sb = (CraftStructureBlock) b.getState();
-			s.add(sb.getSnapshotNBT().getString("metadata"));
+			if (sb.getSnapshotNBT().getString("metadata").contains("lever")) {
+				s.add(sb.getSnapshotNBT().getString("metadata"));
+			}
 		}
 		Collections.sort(s);
-		p.sendMessage(s.get(0));
+		for (String string : s) {
+			p.sendMessage(string);
+		}
 		s.clear();
 	}
 }

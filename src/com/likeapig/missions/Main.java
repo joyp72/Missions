@@ -3,14 +3,10 @@ package com.likeapig.missions;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
 import com.likeapig.missions.commands.CommandsManager;
 import com.likeapig.missions.intro.Intro;
 import com.likeapig.missions.intro.IntroListener;
 import com.likeapig.missions.intro.IntroManager;
-import com.likeapig.missions.intro.IntroTrait;
 import com.likeapig.missions.map.Boss;
 import com.likeapig.missions.map.Map;
 import com.likeapig.missions.map.MapManager;
@@ -18,7 +14,6 @@ import com.likeapig.missions.map.MiniTrait;
 import com.likeapig.missions.map.MissionTrait;
 import com.likeapig.missions.map.RaidListener;
 import com.likeapig.missions.models.LawnMower;
-import com.likeapig.missions.models.Movement;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.trait.TraitInfo;
@@ -46,8 +41,6 @@ public class Main extends JavaPlugin {
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MiniTrait.class));
-		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(IntroTrait.class));
-		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(IntroTrait.class));
 		new Boss();
 		new LawnMower();
 	}

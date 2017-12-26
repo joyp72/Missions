@@ -11,6 +11,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftStructureBlock;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
@@ -21,6 +24,7 @@ import main.RollbackAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
+import net.md_5.bungee.api.ChatColor;
 
 public class Intro {
 	private NPCRegistry registry = CitizensAPI.getNPCRegistry();
@@ -28,26 +32,34 @@ public class Intro {
 	private IntroState state;
 	static IntroData data;
 	private Location spawn;
-	private List<Location> spaces;
 	private List<String> metadata;
-	private HashMap<String, Location> hash;
+	private HashMap<String, Location> paths;
+	private HashMap<String, Location> levers;
+	private int check;
 
 	public Intro(String s) {
 		name = s;
 		state = IntroState.STOPPED;
 		metadata = new ArrayList<String>();
-		hash = new HashMap<String, Location>();
+		paths = new HashMap<String, Location>();
+		levers = new HashMap<String, Location>();
+		check = 0;
 		loadFromConfig();
 		if (spawn != null) {
-			spaces = new ArrayList<Location>(
+			List<Location> locs = new ArrayList<Location>(
 					RollbackAPI.getBlocksOfTypeInRegion(spawn.getWorld(), "intro", Material.STRUCTURE_BLOCK));
+			for (Location l : locs) {
+				CraftStructureBlock sb = (CraftStructureBlock) l.getBlock().getState();
+				if (sb.getSnapshotNBT().getString("metadata").contains("path")) {
+					metadata.add(sb.getSnapshotNBT().getString("metadata"));
+					paths.put(sb.getSnapshotNBT().getString("metadata"), l.add(0, 2, 0));
+				}
+				if (sb.getSnapshotNBT().getString("metadata").contains("lever")) {
+					levers.put(sb.getSnapshotNBT().getString("metadata"), l.add(0, 2, 0));
+				}
+			}
+			Collections.sort(metadata);
 		}
-		for (Location l : spaces) {
-			CraftStructureBlock sb = (CraftStructureBlock) l.getBlock().getState();
-			metadata.add(sb.getSnapshotNBT().getString("metadata"));
-			hash.put(sb.getSnapshotNBT().getString("metadata"), l);
-		}
-		Collections.sort(metadata);
 		checkState();
 	}
 
@@ -78,29 +90,61 @@ public class Intro {
 		}
 	}
 
-	public void start() {
-		getPlayer().teleport(spawn);
-		Pieces.get().spawnPiece(spawn);
-
-		Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
-			@Override
-			public void run() {
-				Random r = new Random();
-				int roll = r.nextInt(spaces.size());
-				message("You rolled: " + Integer.toString(roll + 1));
-				for (NPC npc : Pieces.get().getPieces()) {
-					npc.getNavigator().setTarget(hash.get(metadata.get(roll)));
+	public void handleInteract(PlayerInteractEvent e) {
+		Player p = e.getPlayer();
+		Location loc = e.getClickedBlock().getLocation();
+		Intro i = IntroManager.get().getIntro(p);
+		if (i != null) {
+			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if (levers.containsValue(loc)) {
+					message("lever");
 				}
 			}
-		}, 40L);
+		}
+	}
+
+	public void handleMoveEvent(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		Intro i = IntroManager.get().getIntro(p);
+		if (i != null) {
+			if (check == 0 && p.getLocation().distance(paths.get(metadata.get(0))) <= 2) {
+				message("I remember... a lab...");
+				check = 1;
+			}
+			if (check == 1 && p.getLocation().distance(paths.get(metadata.get(1))) <= 2) {
+				message("I know it is in ruin now, but I remember how it used to be.");
+				check = 2;
+			}
+			if (check == 2 && p.getLocation().distance(paths.get(metadata.get(2))) <= 2) {
+				message("I was just an assistant, but soon,");
+				check = 3;
+			}
+			if (check == 3 && p.getLocation().distance(paths.get(metadata.get(3))) <= 2) {
+				message("A war came that threatend our very existance.");
+				check = 4;
+			}
+			if (check == 4 && p.getLocation().distance(paths.get(metadata.get(4))) <= 2) {
+				message("Our enemies had already launched a missle powerful enough to destroy the entire country...");
+				check = 5;
+			}
+			if (check == 5 && p.getLocation().distance(paths.get(metadata.get(5))) <= 2) {
+				message("There was only one thing we could do:");
+				check = 6;
+			}
+			if (check == 6 && p.getLocation().distance(paths.get(metadata.get(6))) <= 2) {
+				message(ChatColor.RED + "" + ChatColor.ITALIC + "Strike Them First.");
+				check = 7;
+			}
+		}
+	}
+
+	public void start() {
+		getPlayer().teleport(spawn);
+		check = 0;
 	}
 
 	public void stop() {
 		setState(IntroState.WAITING);
-		for (NPC npc : Pieces.get().getPieces()) {
-			registry.deregister(npc);
-		}
-		Pieces.get().getPieces().clear();
 	}
 
 	public void addPlayer(Player p) {
@@ -144,10 +188,6 @@ public class Intro {
 
 	public String getName() {
 		return name;
-	}
-
-	public List<Location> getSpaces() {
-		return spaces;
 	}
 
 	public String getStateName() {

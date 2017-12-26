@@ -237,11 +237,14 @@ public class Map {
 			consoles.add(console3);
 			consoles.add(console4);
 		}
-		glasses = new ArrayList<Location>(
-				RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.GLASS));
-		barriers = new ArrayList<Location>(
-				RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.BARRIER));
-		trapdoor = new ArrayList<Location>(RollbackAPI.getBlocksOfTypeInRegion(spawn.getWorld(), "robot", Material.TRAP_DOOR));
+		if (bossLoc4 != null) {
+			glasses = new ArrayList<Location>(
+					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.GLASS));
+			barriers = new ArrayList<Location>(
+					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.BARRIER));
+			trapdoor = new ArrayList<Location>(
+					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.TRAP_DOOR));
+		}
 		saveToConfig();
 		this.checkState();
 	}
@@ -1013,6 +1016,7 @@ public class Map {
 			}
 			Map.data = new Data(p, this);
 			this.message(ChatColor.GREEN + p.getName() + " joined the Mission!");
+			p.teleport(spawn);
 		}
 	}
 
@@ -1193,11 +1197,11 @@ public class Map {
 	public List<Location> getChests() {
 		return chests;
 	}
-	
+
 	public void setComplete(boolean b) {
 		complete = b;
 	}
-	
+
 	public boolean isComplete() {
 		return complete;
 	}
@@ -1301,7 +1305,7 @@ public class Map {
 			return null;
 		}
 	}
-	
+
 	public List<Location> getTrapDoor() {
 		return trapdoor;
 	}
