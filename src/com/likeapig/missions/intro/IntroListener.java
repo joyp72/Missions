@@ -11,6 +11,9 @@ import org.bukkit.plugin.Plugin;
 
 import com.likeapig.missions.Main;
 
+import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
+import net.citizensnpcs.api.npc.NPC;
+
 public class IntroListener implements Listener {
 	public static IntroListener instance;
 

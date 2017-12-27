@@ -9,7 +9,9 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftStructureBlock;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -18,16 +20,18 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
 import com.likeapig.missions.commands.MessageManager;
+import com.likeapig.missions.commands.MessageManager.MessageType;
 import com.likeapig.missions.utils.LocationUtils;
+import com.likeapig.missions.utils.ParticleEffect;
 
 import main.RollbackAPI;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 
 public class Intro {
-	private NPCRegistry registry = CitizensAPI.getNPCRegistry();
 	private String name;
 	private IntroState state;
 	static IntroData data;
@@ -35,17 +39,30 @@ public class Intro {
 	private List<String> metadata;
 	private HashMap<String, Location> paths;
 	private HashMap<String, Location> levers;
+	private HashMap<String, Location> particles;
+	private List<Location> npcLocs;
 	private int check;
+	private int id;
 
 	public Intro(String s) {
 		name = s;
 		state = IntroState.STOPPED;
 		metadata = new ArrayList<String>();
+		npcLocs = new ArrayList<Location>();
 		paths = new HashMap<String, Location>();
 		levers = new HashMap<String, Location>();
+		particles = new HashMap<String, Location>();
 		check = 0;
 		loadFromConfig();
+		checkState();
+	}
+
+	public void setupSBs() {
 		if (spawn != null) {
+			metadata.clear();
+			npcLocs.clear();
+			paths.clear();
+			levers.clear();
 			List<Location> locs = new ArrayList<Location>(
 					RollbackAPI.getBlocksOfTypeInRegion(spawn.getWorld(), "intro", Material.STRUCTURE_BLOCK));
 			for (Location l : locs) {
@@ -53,14 +70,16 @@ public class Intro {
 				if (sb.getSnapshotNBT().getString("metadata").contains("path")) {
 					metadata.add(sb.getSnapshotNBT().getString("metadata"));
 					paths.put(sb.getSnapshotNBT().getString("metadata"), l.add(0, 2, 0));
-				}
-				if (sb.getSnapshotNBT().getString("metadata").contains("lever")) {
+				} else if (sb.getSnapshotNBT().getString("metadata").contains("lever")) {
 					levers.put(sb.getSnapshotNBT().getString("metadata"), l.add(0, 2, 0));
+				} else if (sb.getSnapshotNBT().getString("metadata").contains("particle")) {
+					particles.put(sb.getSnapshotNBT().getString("metadata"), l.add(0, 2, 0));
+				} else if (sb.getSnapshotNBT().getString("metadata").contains("npc")) {
+					npcLocs.add(l.add(0, 2, 0));
 				}
 			}
 			Collections.sort(metadata);
 		}
-		checkState();
 	}
 
 	private void checkState() {
@@ -90,14 +109,60 @@ public class Intro {
 		}
 	}
 
+	public void enableSmoke() {
+		List<Location> exp = new ArrayList<Location>();
+		if (exp.isEmpty()) {
+			for (Location loc : particles.values()) {
+				exp.add(loc);
+			}
+		}
+		id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
+
+			int t = 0;
+			Random r = new Random();
+
+			@Override
+			public void run() {
+				t++;
+				for (Location loc : particles.values()) {
+					Location l = loc.clone().add(0, 1, 0);
+					ParticleEffect.SMOKE.display(l, 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().add(0, 0, 0.5), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().add(0.5, 0, 0), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().subtract(0, 0, 0.5), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().subtract(0.5, 0, 0), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().add(0, 0, 1), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().add(1, 0, 0), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().subtract(1, 0, 0), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+					ParticleEffect.SMOKE.display(l.clone().subtract(0, 0, 1), 0.0f, 0.0f, 0.0f, 0.0f, 25);
+				}
+				if (t >= 3) {
+					Location x = exp.get(r.nextInt(exp.size()));
+					ParticleEffect.EXPLOSION_LARGE.display(x.clone().add(0, 1, 0), 0.0f, 0.0f, 0.0f, 0.0f, 1);
+					x.getWorld().playSound(x.clone(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+					t = 0;
+				}
+			}
+		}, 0L, 5L);
+	}
+
+	public void disableSmoke() {
+		Bukkit.getServer().getScheduler().cancelTask(id);
+	}
+
 	public void handleInteract(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
-		Location loc = e.getClickedBlock().getLocation();
 		Intro i = IntroManager.get().getIntro(p);
 		if (i != null) {
 			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (levers.containsValue(loc)) {
-					message("lever");
+				if (levers.size() > 0 && levers.containsValue(e.getClickedBlock().getLocation())) {
+					message("Machine activated.");
+					levers.values().remove(e.getClickedBlock().getLocation());
+				}
+				if (check != 69 && levers.size() == 0) {
+					message("Missile is about to lauch, please stand by..");
+					enableSmoke();
+					check = 69;
 				}
 			}
 		}
@@ -133,18 +198,27 @@ public class Intro {
 			}
 			if (check == 6 && p.getLocation().distance(paths.get(metadata.get(6))) <= 2) {
 				message(ChatColor.RED + "" + ChatColor.ITALIC + "Strike Them First.");
+				Bukkit.getServer().getScheduler().runTaskLater(Main.get(), new Runnable() {
+					@Override
+					public void run() {
+						p.sendMessage(ChatColor.GREEN + "Scientist" + ChatColor.WHITE
+								+ ": Quick, activate all computers using the levers!");
+					}
+				}, 40L);
 				check = 7;
 			}
 		}
 	}
 
 	public void start() {
+		setupSBs();
 		getPlayer().teleport(spawn);
 		check = 0;
 	}
 
 	public void stop() {
 		setState(IntroState.WAITING);
+		disableSmoke();
 	}
 
 	public void addPlayer(Player p) {
@@ -159,7 +233,7 @@ public class Intro {
 		if (containsPlayer(p)) {
 			data.restore();
 			data = null;
-			MessageManager.get().message(p, "You quit the Intro.");
+			MessageManager.get().message(p, "You quit the Intro.", MessageType.BAD);
 			stop();
 		}
 	}
