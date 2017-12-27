@@ -74,6 +74,7 @@ public class Menus {
 						lore.add(ChatColor.GRAY + "(Click to join)");
 						lore.add(" ");
 						lore.add(ChatColor.GRAY + "Status: " + ChatColor.GREEN + "Online");
+						lore.add(ChatColor.GRAY + "Difficulty: " + ChatColor.GREEN + "Normal");
 						meta.setLore(lore);
 						meta.addItemFlags(ItemFlag.values());
 						item.setItemMeta(meta);
@@ -89,6 +90,7 @@ public class Menus {
 						lore.add(ChatColor.GRAY + "(Unable to join)");
 						lore.add(" ");
 						lore.add(ChatColor.GRAY + "Status: " + ChatColor.RED + "Running");
+						lore.add(ChatColor.GRAY + "Difficulty: " + ChatColor.GREEN + "Normal");
 						meta.setLore(lore);
 						meta.addItemFlags(ItemFlag.values());
 						item.setItemMeta(meta);

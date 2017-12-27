@@ -80,6 +80,24 @@ public class MenusListener implements Listener {
 									MessageManager.MessageType.BAD);
 							return;
 						}
+						if (p.getInventory().contains(Material.REDSTONE)
+								|| p.getInventory().contains(Material.REDSTONE_BLOCK)) {
+							MessageManager.get().message(p, "Redstone is not allowed inside the mission!",
+									MessageType.BAD);
+							return;
+						}
+						if (p.getInventory().contains(Material.ENDER_PEARL)) {
+							MessageManager.get().message(p, "Ender Pearls is not allowed inside the mission!",
+									MessageType.BAD);
+							return;
+						}
+						if (p.getInventory().getItemInOffHand().getType() != Material.SHIELD) {
+							if (!(p.getInventory().contains(Material.SHIELD))) {
+								MessageManager.get().message(p, "This mission requires you to equip a shield.",
+										MessageType.BAD);
+								return;
+							}
+						}
 						if (i.isStarted()) {
 							MessageManager.get().message(p, "Map is being used!", MessageType.BAD);
 							return;
