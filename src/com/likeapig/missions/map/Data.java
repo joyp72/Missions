@@ -25,6 +25,7 @@ public class Data
         final Player p = Bukkit.getPlayer(this.id);
         p.getInventory().setContents(contents);
         p.getInventory().setArmorContents(armorContents);
+        p.teleport(location);
     }
     
     public Map getMap() {

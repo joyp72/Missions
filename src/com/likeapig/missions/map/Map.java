@@ -819,7 +819,6 @@ public class Map {
 		loadChests();
 		loadChests();
 		skinHeads();
-		this.setState(MapState.STARTED);
 		Lazer.get();
 		Final.get();
 		firstRound();
@@ -1017,6 +1016,7 @@ public class Map {
 			Map.data = new Data(p, this);
 			this.message(ChatColor.GREEN + p.getName() + " joined the Mission!");
 			p.teleport(spawn);
+			setState(MapState.STARTED);
 		}
 	}
 
@@ -1040,6 +1040,8 @@ public class Map {
 			}
 			if (!complete) {
 				data.restore();
+			} else {
+				p.teleport(data.getLocation());
 			}
 			Final.get().removeBoss();
 			Map.data = null;

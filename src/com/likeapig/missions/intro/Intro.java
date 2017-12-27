@@ -119,11 +119,13 @@ public class Intro {
 		id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.get(), new Runnable() {
 
 			int t = 0;
+			int s = 0;
 			Random r = new Random();
 
 			@Override
 			public void run() {
 				t++;
+				s++;
 				for (Location loc : particles.values()) {
 					Location l = loc.clone().add(0, 1, 0);
 					ParticleEffect.SMOKE.display(l, 0.0f, 0.0f, 0.0f, 0.0f, 25);
@@ -141,6 +143,10 @@ public class Intro {
 					ParticleEffect.EXPLOSION_LARGE.display(x.clone().add(0, 1, 0), 0.0f, 0.0f, 0.0f, 0.0f, 1);
 					x.getWorld().playSound(x.clone(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
 					t = 0;
+				}
+				if (s >= 20) {
+					removePlayer(getPlayer());
+					s = 0;
 				}
 			}
 		}, 0L, 5L);
@@ -211,6 +217,7 @@ public class Intro {
 	}
 
 	public void start() {
+		setState(IntroState.STARTED);
 		setupSBs();
 		getPlayer().teleport(spawn);
 		check = 0;
@@ -218,7 +225,6 @@ public class Intro {
 
 	public void stop() {
 		setState(IntroState.WAITING);
-		disableSmoke();
 	}
 
 	public void addPlayer(Player p) {
@@ -231,6 +237,7 @@ public class Intro {
 
 	public void removePlayer(Player p) {
 		if (containsPlayer(p)) {
+			disableSmoke();
 			data.restore();
 			data = null;
 			MessageManager.get().message(p, "You quit the Intro.", MessageType.BAD);
@@ -262,6 +269,10 @@ public class Intro {
 
 	public String getName() {
 		return name;
+	}
+
+	public IntroState getState() {
+		return state;
 	}
 
 	public String getStateName() {

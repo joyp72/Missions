@@ -27,6 +27,7 @@ public class IntroData {
 		Player p = Bukkit.getPlayer(id);
 		p.getInventory().setContents(contents);
 		p.getInventory().setArmorContents(armorContents);
+		p.teleport(location);
 	}
 
 	public Intro getIntro() {

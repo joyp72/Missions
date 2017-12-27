@@ -13,6 +13,7 @@ import com.likeapig.missions.map.MapManager;
 import com.likeapig.missions.map.MiniTrait;
 import com.likeapig.missions.map.MissionTrait;
 import com.likeapig.missions.map.RaidListener;
+import com.likeapig.missions.menus.MenusListener;
 import com.likeapig.missions.models.LawnMower;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -34,6 +35,7 @@ public class Main extends JavaPlugin {
 		CommandsManager.get().setup();
 		RaidListener.get().setup();
 		IntroListener.get().setup();
+		MenusListener.get().setup();
 		Settings.get().setup((Plugin) this);
 		MapManager.get().setupMaps();
 		IntroManager.get().setupIntros();
