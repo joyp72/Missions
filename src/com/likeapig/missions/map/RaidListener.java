@@ -3,13 +3,11 @@ package com.likeapig.missions.map;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.logging.log4j.core.appender.AsyncAppender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
@@ -18,27 +16,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.mcmonkey.sentinel.SentinelTrait;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.commands.MessageManager;
 import com.likeapig.missions.commands.MessageManager.MessageType;
-import com.likeapig.missions.models.LawnMower;
 
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDamageEntityEvent;
@@ -71,6 +65,22 @@ public class RaidListener implements Listener {
 			m.kickPlayer(p);
 		}
 	}
+	
+	@EventHandler
+	public void onPlayerDropItem(final PlayerDropItemEvent e) {
+		final Player p = e.getPlayer();
+		if (MapManager.get().getMap(p) != null) {
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerPickItem(final PlayerPickupItemEvent e) {
+		final Player p = e.getPlayer();
+		if (MapManager.get().getMap(p) != null) {
+			e.setCancelled(true);
+		}
+	}
 
 	@EventHandler
 	public void playerInteract(PlayerInteractEvent e) {
@@ -80,8 +90,9 @@ public class RaidListener implements Listener {
 			if (m.isLocked() || !p.getInventory().contains(m.getCard(3))) {
 				if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					Block block = e.getClickedBlock();
-					if (block.getType() == Material.SPRUCE_DOOR) {
+					if (block.getType() == Material.DARK_OAK_DOOR) {
 						e.setCancelled(true);
+						return;
 					}
 				}
 			}
@@ -90,7 +101,15 @@ public class RaidListener implements Listener {
 					Block block = e.getClickedBlock();
 					if (m.getTrapDoor().contains(block.getLocation())) {
 						m.start();
+						return;
 					}
+				}
+			}
+			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if (p.getItemInHand().getType() == Material.REDSTONE) {
+					m.getRS().getBlock().setType(Material.REDSTONE_WIRE);
+					m.getRS().getBlock().getState().update();
+					return;
 				}
 			}
 		}
@@ -170,8 +189,8 @@ public class RaidListener implements Listener {
 		Map map = MapManager.get().getMap(p);
 		if (editors.contains(p) && map == null) {
 			if (e.getClickedBlock().getType() == Material.STONE_BUTTON && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (edit.containsKey(MapManager.get().getMap("test"))) {
-					Map m = MapManager.get().getMap("test");
+				if (edit.containsKey(MapManager.get().getMap("map"))) {
+					Map m = MapManager.get().getMap("map");
 					if (edit.get(m) == 21) {
 						m.setButton2(1, e.getClickedBlock().getLocation());
 						MessageManager.get().message(p, "You set button for " + m.getName());
@@ -210,8 +229,8 @@ public class RaidListener implements Listener {
 				}
 			}
 			if (e.getClickedBlock().getType() == Material.CHEST && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (edit.containsKey(MapManager.get().getMap("test"))) {
-					Map m = MapManager.get().getMap("test");
+				if (edit.containsKey(MapManager.get().getMap("map"))) {
+					Map m = MapManager.get().getMap("map");
 					if (edit.get(m) == 1) {
 						m.setChest(1, e.getClickedBlock().getLocation());
 						MessageManager.get().message(p, "You set chest1 for " + m.getName());
@@ -250,8 +269,8 @@ public class RaidListener implements Listener {
 				}
 			}
 			if (e.getClickedBlock().getType() == Material.REDSTONE_WIRE && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (edit.containsKey(MapManager.get().getMap("test"))) {
-					Map m = MapManager.get().getMap("test");
+				if (edit.containsKey(MapManager.get().getMap("map"))) {
+					Map m = MapManager.get().getMap("map");
 					if (edit.get(m) == 45) {
 						m.setRS(e.getClickedBlock().getLocation());
 						MessageManager.get().message(p, "You set rs for " + m.getName());
@@ -263,8 +282,8 @@ public class RaidListener implements Listener {
 			}
 			if (e.getClickedBlock().getType() == Material.SKULL || e.getClickedBlock().getType() == Material.SKULL_ITEM
 					&& e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (edit.containsKey(MapManager.get().getMap("test"))) {
-					Map m = MapManager.get().getMap("test");
+				if (edit.containsKey(MapManager.get().getMap("map"))) {
+					Map m = MapManager.get().getMap("map");
 					if (edit.get(m) == 61) {
 						m.setHead(1, e.getClickedBlock().getLocation());
 						MessageManager.get().message(p, "You set head for " + m.getName());
@@ -296,8 +315,8 @@ public class RaidListener implements Listener {
 				}
 			}
 			if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (edit.containsKey(MapManager.get().getMap("test"))) {
-					Map m = MapManager.get().getMap("test");
+				if (edit.containsKey(MapManager.get().getMap("map"))) {
+					Map m = MapManager.get().getMap("map");
 					if (edit.get(m) == 71) {
 						m.setConsole(1, e.getClickedBlock().getLocation());
 						MessageManager.get().message(p, "You set console for " + m.getName());

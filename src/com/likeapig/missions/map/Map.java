@@ -21,6 +21,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.Openable;
 
 import com.likeapig.missions.Main;
 import com.likeapig.missions.Settings;
@@ -91,13 +93,12 @@ public class Map {
 	private Location rs;
 	private List<Location> chests;
 	private List<Location> tempchests;
-	private List<String> fifteen;
-	private List<String> ten;
-	private List<String> five;
+	private List<String> two;
+	private List<String> one;
 	private List<String> twentyfive;
+	private List<String> fifteen;
 	private List<String> fifty;
-	private List<String> seventyfive;
-	private List<String> eighty;
+	private List<String> twelve;
 	private boolean locked;
 	private boolean first;
 	private boolean second;
@@ -113,6 +114,7 @@ public class Map {
 	private List<Location> glasses;
 	private List<Location> barriers;
 	private List<Location> trapdoor;
+	private List<Location> door;
 
 	public Map(final String s) {
 		this.registry = CitizensAPI.getNPCRegistry();
@@ -129,23 +131,13 @@ public class Map {
 		chests = new ArrayList<Location>();
 		tempchests = new ArrayList<Location>();
 		fifteen = new ArrayList<String>();
-		ten = new ArrayList<String>();
-		five = new ArrayList<String>();
+		two = new ArrayList<String>();
+		one = new ArrayList<String>();
 		twentyfive = new ArrayList<String>();
 		fifty = new ArrayList<String>();
-		seventyfive = new ArrayList<String>();
-		eighty = new ArrayList<String>();
+		twelve = new ArrayList<String>();
 		heads = new ArrayList<Location>();
 		consoles = new ArrayList<Location>();
-		fifteen.add(Material.IRON_INGOT.toString());
-		fifteen.add(Material.IRON_HELMET.toString());
-		fifteen.add(Material.IRON_CHESTPLATE.toString());
-		ten.add(Material.AIR.toString());
-		five.add(Material.AIR.toString());
-		twentyfive.add(Material.AIR.toString());
-		fifty.add(Material.AIR.toString());
-		seventyfive.add(Material.AIR.toString());
-		eighty.add(Material.AIR.toString());
 		this.state = MapState.STOPPED;
 		this.name = s;
 		complete = false;
@@ -156,6 +148,8 @@ public class Map {
 		floor = 1;
 		round = 1;
 		i = 1;
+		Final.get();
+		Lazer.get();
 		card1 = new ItemStack(Material.PAPER);
 		{
 			ItemMeta meta = card1.getItemMeta();
@@ -244,6 +238,8 @@ public class Map {
 					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.BARRIER));
 			trapdoor = new ArrayList<Location>(
 					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.TRAP_DOOR));
+			door = new ArrayList<Location>(
+					RollbackAPI.getBlocksOfTypeInRegion(bossLoc4.getWorld(), "robot", Material.DARK_OAK_DOOR));
 		}
 		saveToConfig();
 		this.checkState();
@@ -259,27 +255,24 @@ public class Map {
 		int slot = r3.nextInt(26);
 		String s = Material.AIR.toString();
 		String s2 = Material.AIR.toString();
-		if (ch <= 5) {
-			s = five.get(r4.nextInt(five.size()));
-			s2 = five.get(r5.nextInt(five.size()));
-		} else if (ch <= 10) {
-			s = ten.get(r4.nextInt(ten.size()));
-			s2 = ten.get(r5.nextInt(ten.size()));
-		} else if (ch <= 15) {
+		if (ch <= 2) {
+			s = one.get(r4.nextInt(one.size()));
+			s2 = one.get(r5.nextInt(one.size()));
+		} else if (ch <= 4) {
+			s = two.get(r4.nextInt(two.size()));
+			s2 = two.get(r5.nextInt(two.size()));
+		} else if (ch <= 24) {
+			s = twelve.get(r4.nextInt(twelve.size()));
+			s2 = twelve.get(r5.nextInt(twelve.size()));
+		} else if (ch <= 30) {
 			s = fifteen.get(r4.nextInt(fifteen.size()));
 			s2 = fifteen.get(r5.nextInt(fifteen.size()));
-		} else if (ch <= 25) {
+		} else if (ch <= 50) {
 			s = twentyfive.get(r4.nextInt(twentyfive.size()));
 			s2 = twentyfive.get(r5.nextInt(twentyfive.size()));
-		} else if (ch <= 50) {
+		} else if (ch <= 100) {
 			s = fifty.get(r4.nextInt(fifty.size()));
 			s2 = fifty.get(r5.nextInt(fifty.size()));
-		} else if (ch <= 75) {
-			s = seventyfive.get(r4.nextInt(seventyfive.size()));
-			s2 = seventyfive.get(r5.nextInt(seventyfive.size()));
-		} else if (ch <= 80) {
-			s = eighty.get(r4.nextInt(eighty.size()));
-			s2 = eighty.get(r5.nextInt(eighty.size()));
 		}
 		Location loc = chests.get(r.nextInt(chests.size()));
 		if (!tempchests.contains(loc) && i == 1) {
@@ -321,8 +314,8 @@ public class Map {
 			Chest c = (Chest) b.getState();
 			Inventory ci = c.getInventory();
 			ItemStack is = new ItemStack(Material.getMaterial(s.toUpperCase()));
-			ci.setItem(3, new ItemStack(Material.REDSTONE));
 			ci.setItem(slot, is);
+			ci.setItem(3, new ItemStack(Material.REDSTONE));
 			tempchests.add(loc);
 			chests.remove(loc);
 			i++;
@@ -411,11 +404,11 @@ public class Map {
 		if (s.getLoot("loot." + getName() + ".15") != null) {
 			fifteen = s.getLoot("loot." + getName() + ".15");
 		}
-		if (s.getLoot("loot." + getName() + ".10") != null) {
-			ten = s.getLoot("loot." + getName() + ".10");
+		if (s.getLoot("loot." + getName() + ".1") != null) {
+			one = s.getLoot("loot." + getName() + ".1");
 		}
-		if (s.getLoot("loot." + getName() + ".5") != null) {
-			five = s.getLoot("loot." + getName() + ".5");
+		if (s.getLoot("loot." + getName() + ".2") != null) {
+			two = s.getLoot("loot." + getName() + ".2");
 		}
 		if (s.getLoot("loot." + getName() + ".25") != null) {
 			twentyfive = s.getLoot("loot." + getName() + ".25");
@@ -423,22 +416,18 @@ public class Map {
 		if (s.getLoot("loot." + getName() + ".50") != null) {
 			fifty = s.getLoot("loot." + getName() + ".50");
 		}
-		if (s.getLoot("loot." + getName() + ".75") != null) {
-			seventyfive = s.getLoot("loot." + getName() + ".75");
-		}
-		if (s.getLoot("loot." + getName() + ".80") != null) {
-			eighty = s.getLoot("loot." + getName() + ".80");
+		if (s.getLoot("loot." + getName() + ".12") != null) {
+			twelve = s.getLoot("loot." + getName() + ".12");
 		}
 	}
 
 	public void saveLoot() {
 		Settings.get().setLoot("loot." + getName() + ".15", fifteen);
-		Settings.get().setLoot("loot." + getName() + ".10", ten);
-		Settings.get().setLoot("loot." + getName() + ".5", five);
+		Settings.get().setLoot("loot." + getName() + ".1", one);
+		Settings.get().setLoot("loot." + getName() + ".2", two);
 		Settings.get().setLoot("loot." + getName() + ".25", twentyfive);
 		Settings.get().setLoot("loot." + getName() + ".50", fifty);
-		Settings.get().setLoot("loot." + getName() + ".75", seventyfive);
-		Settings.get().setLoot("loot." + getName() + ".80", eighty);
+		Settings.get().setLoot("loot." + getName() + ".12", twelve);
 	}
 
 	public void saveToConfig() {
@@ -813,6 +802,7 @@ public class Map {
 	}
 
 	public void start() {
+		setState(MapState.STARTED);
 		loadChests();
 		loadChests();
 		loadChests();
@@ -1016,7 +1006,30 @@ public class Map {
 			Map.data = new Data(p, this);
 			this.message(ChatColor.GREEN + p.getName() + " joined the Mission!");
 			p.teleport(spawn);
-			setState(MapState.STARTED);
+			setState(MapState.STARTING);
+		}
+	}
+
+	public void closeDoor() {
+		for (Location l : trapdoor) {
+			Block b = l.getBlock();
+			BlockState state = b.getState();
+			if (state.getData() instanceof Openable) {
+				Openable opn = (Openable) state.getData();
+				opn.setOpen(false);
+				state.setData((MaterialData) opn);
+				state.update();
+			}
+		}
+		for (Location l : door) {
+			Block b = l.getBlock();
+			BlockState state = b.getState();
+			if (state.getData() instanceof Openable) {
+				Openable opn = (Openable) state.getData();
+				opn.setOpen(false);
+				state.setData((MaterialData) opn);
+				state.update();
+			}
 		}
 	}
 
@@ -1043,6 +1056,8 @@ public class Map {
 			} else {
 				p.teleport(data.getLocation());
 			}
+			closeDoor();
+			restoreGlass();
 			Final.get().removeBoss();
 			Map.data = null;
 			if (Map.data == null) {
@@ -1619,7 +1634,7 @@ public class Map {
 
 	public enum MapState {
 		WAITING("WAITING", 0, "WAITING", 0, "WAITING", 0, "WAITING", true), STARTING("STARTING", 1, "STARTING", 1,
-				"STARTING", 1, "STARTING", true), STARTED("STARTED", 2, "STARTED", 2, "STARTED", 2, "STARTED",
+				"STARTING", 1, "STARTING", false), STARTED("STARTED", 2, "STARTED", 2, "STARTED", 2, "STARTED",
 						false), STOPPED("STOPPED", 3, "STOPPED", 3, "STOPPED", 3, "STOPPED", false);
 
 		private boolean allowJoin;

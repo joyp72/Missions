@@ -81,7 +81,7 @@ public class Menus {
 						item.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 2);
 						mi.setItem(3, item);
 					}
-				} else if (i.isStarted()) {
+				} else if (i.isStarted() || i.getState().equals(MapState.STARTING)) {
 					ItemStack item = new ItemStack(Material.IRON_BLOCK);
 					{
 						ItemMeta meta = item.getItemMeta();

@@ -8,7 +8,6 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,11 +28,8 @@ import com.likeapig.missions.utils.ParticleEffect;
 import com.likeapig.missions.utils.ParticleEffect.ParticleData;
 import com.likeapig.missions.utils.Titles;
 
-import de.Ste3et_C0st.FurnitureLib.main.FurnitureLib;
 import net.apcat.simplesit.SimpleSitPlayer;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_12_R1.IteratorUtils;
-import net.minecraft.server.v1_12_R1.Packet;
 
 public class Final {
 
@@ -49,7 +45,6 @@ public class Final {
 	Fireball fb;
 	Fireball fb2;
 	List<Fireball> fbs = new ArrayList<Fireball>();
-	public FurnitureLib ins = FurnitureLib.getInstance();
 	List<Location> destroyed = new ArrayList<Location>();
 	public static boolean hit = false;
 	public static boolean check = false;

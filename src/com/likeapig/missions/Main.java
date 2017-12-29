@@ -14,7 +14,6 @@ import com.likeapig.missions.map.MiniTrait;
 import com.likeapig.missions.map.MissionTrait;
 import com.likeapig.missions.map.RaidListener;
 import com.likeapig.missions.menus.MenusListener;
-import com.likeapig.missions.models.LawnMower;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.trait.TraitInfo;
@@ -44,7 +43,6 @@ public class Main extends JavaPlugin {
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MiniTrait.class));
 		new Boss();
-		new LawnMower();
 	}
 
 	public void onDisable() {

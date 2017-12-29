@@ -129,7 +129,7 @@ public class Edit extends Commands {
 		}
 		if (args[1].equalsIgnoreCase("22")) {
 			editors.add(sender);
-			edit.put(m, 23);
+			edit.put(m, 22);
 			MessageManager.get().message(sender, "Editing button 2, floor 3 for: " + m.getName());
 			return;
 		}

@@ -25,7 +25,7 @@ public class MissionTrait extends Trait {
 	}
 
 	Plugin plugin = null;
-	Map map = MapManager.get().getMap("test");
+	Map map = MapManager.get().getMap("map");
 
 	boolean SomeSetting = false;
 

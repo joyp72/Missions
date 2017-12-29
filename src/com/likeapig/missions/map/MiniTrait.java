@@ -45,7 +45,7 @@ public class MiniTrait extends Trait {
 	}
 
 	Plugin plugin = null;
-	Map map = MapManager.get().getMap("test");
+	Map map = MapManager.get().getMap("map");
 	Player p = map.getPlayer();
 	Boolean charged = false;
 	int t = 0;
