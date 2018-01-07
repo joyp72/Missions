@@ -182,6 +182,9 @@ public class Mob {
 		round3.add(npc);
 		npc.spawn(loc);
 		if (npc.isSpawned()) {
+			Damageable entity = (Damageable) npc.getEntity();
+			entity.setMaxHealth(10);
+			entity.setHealth(10);
 			((HumanEntity) npc.getEntity()).getInventory().setItemInMainHand(bossStick);
 		}
 	}

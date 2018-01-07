@@ -407,8 +407,8 @@ public class Final {
 						if (!destroyed.contains(console.clone().add(0.5, 0.5, 0.5))) {
 							destroyed.add(console.clone().add(0.5, 0.5, 0.5));
 							m.message("A console has been destroyed!");
+							check = true;
 						}
-						check = true;
 					}
 				}
 			}

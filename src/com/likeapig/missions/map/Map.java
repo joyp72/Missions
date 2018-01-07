@@ -879,8 +879,6 @@ public class Map {
 			message("Guards have been deployed.");
 			Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 0));
 			Mob.get().spawnGuard(bossLoc2.clone().add(0, 0, 2));
-			Mob.get().spawnGuard(bossLoc2.clone().add(1, 0, 2));
-			Mob.get().spawnGuard(bossLoc2.clone().add(2, 0, 1));
 		}
 	}
 

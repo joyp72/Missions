@@ -73,14 +73,6 @@ public class RaidListener implements Listener {
 			e.setCancelled(true);
 		}
 	}
-	
-	@EventHandler
-	public void onPlayerPickItem(final PlayerPickupItemEvent e) {
-		final Player p = e.getPlayer();
-		if (MapManager.get().getMap(p) != null) {
-			e.setCancelled(true);
-		}
-	}
 
 	@EventHandler
 	public void playerInteract(PlayerInteractEvent e) {

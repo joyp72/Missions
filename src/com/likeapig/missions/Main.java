@@ -1,5 +1,8 @@
 package com.likeapig.missions;
 
+import org.bukkit.Bukkit;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -38,6 +41,10 @@ public class Main extends JavaPlugin {
 		Settings.get().setup((Plugin) this);
 		MapManager.get().setupMaps();
 		IntroManager.get().setupIntros();
+		if (Bukkit.getPluginManager().getPermission("story.mission") == null) {
+			Bukkit.getPluginManager().addPermission(new Permission("story.mission"));
+			Bukkit.getPluginManager().getPermission("story.mission").setDefault(PermissionDefault.OP);
+		}
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(MissionTrait.class));
 		CitizensAPI.getTraitFactory().deregisterTrait(TraitInfo.create(MiniTrait.class));

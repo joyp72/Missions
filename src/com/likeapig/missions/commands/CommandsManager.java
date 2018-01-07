@@ -3,6 +3,7 @@ package com.likeapig.missions.commands;
 import com.likeapig.missions.*;
 import com.likeapig.missions.menus.Menus;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.*;
 import java.util.*;
@@ -57,41 +58,6 @@ public class CommandsManager implements CommandExecutor {
 			new Menus(p);
 			p.openInventory(Menus.getMenus().get(p));
 		}
-		if (args.length == 0 && !gui) {
-			MessageManager.get().message(p, "Commands List:");
-			for (final Commands c : this.cmds) {
-				if (!c.noIndex()) {
-					MessageManager.get().message(p,
-							"/story " + c.getClass().getSimpleName().toLowerCase() + " " + c.getUsage());
-				}
-			}
-			return true;
-		}
-		if (args.length != 0) {
-			final Commands c = this.getCommand(args[0]);
-			if (c != null) {
-				final List<String> a = new ArrayList<String>(Arrays.asList(args));
-				a.remove(0);
-				args = a.toArray(new String[a.size()]);
-				c.commandPreprocess(p, args);
-			}
-		}
 		return true;
-	}
-
-	private Commands getCommand(final String name) {
-		for (final Commands c : this.cmds) {
-			if (c.getClass().getSimpleName().trim().equalsIgnoreCase(name.trim())) {
-				return c;
-			}
-			String[] aliases;
-			for (int length = (aliases = c.getAliases()).length, i = 0; i < length; ++i) {
-				final String s = aliases[i];
-				if (s.trim().equalsIgnoreCase(name.trim())) {
-					return c;
-				}
-			}
-		}
-		return null;
 	}
 }
